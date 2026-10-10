@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Video AI</h1>
+{% if videos %}
+  <ul>
+  {% for v in videos %}
+    <li><a href="{{ url_for('store.video_detail', video_id=v.id) }}">{{ v.title }}</a> - {{ v.price|vnd }}</li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>Chưa có video nào đang bán.</p>
+{% endif %}
+{% endblock %}
