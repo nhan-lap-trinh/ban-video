@@ -51,7 +51,7 @@ def load_config():
         "BANK_CODE": os.environ.get("BANK_CODE", "").strip(),
         "BANK_ACCOUNT_NAME": os.environ.get("BANK_ACCOUNT_NAME", "").strip(),
         # Dịch vụ vẽ ảnh QR của SePay. qr.sepay.vn và vietqr.app là của cùng SePay.
-        "QR_IMAGE_BASE": os.environ.get("QR_IMAGE_BASE", "https://qr.sepay.vn/img").strip(),
+        "QR_IMAGE_BASE": os.environ.get("QR_IMAGE_BASE", "https://vietqr.app/img").strip(),
         "PAYMENT_PREFIX": os.environ.get("PAYMENT_PREFIX", "DH").strip().upper(),
         "ORDER_EXPIRE_MINUTES": _env_int("ORDER_EXPIRE_MINUTES", 15),
         "DOWNLOAD_LINK_SECONDS": _env_int("DOWNLOAD_LINK_SECONDS", 300),
@@ -150,7 +150,9 @@ def create_app(test_config=None):
         # ví dụ khi trình duyệt tải ảnh QR từ SePay.
         resp.headers["Referrer-Policy"] = "no-referrer"
         resp.headers["Content-Security-Policy"] = (
-            "default-src 'self'; img-src 'self' https://qr.sepay.vn https://vietqr.app https://*.sepay.vn; "
+            # img-src cho phép mọi ảnh https: dịch vụ QR có thể chuyển tiếp sang máy chủ ảnh khác.
+            # Ảnh không chạy được mã nên mở rộng chỗ này không ảnh hưởng an toàn.
+            "default-src 'self'; img-src 'self' https: data:; "
             "media-src 'self'; "
             "script-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; "
             "base-uri 'none'"
