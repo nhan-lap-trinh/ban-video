@@ -1,0 +1,42 @@
+# Cấu hình để Render tự dựng web từ GitHub (Render gọi đây là "Blueprint").
+# Mỗi lần bạn đẩy code mới lên GitHub, Render tự cập nhật web.
+services:
+  - type: web
+    name: ban-video-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true      # Render tự sinh khóa ngẫu nhiên
+      - key: PRODUCTION
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: TEST_FILES
+        value: "1"               # giai đoạn test: cho phép sản phẩm .txt
+      - key: TEST_PRODUCT_PRICE
+        value: "5000"            # tự tạo sẵn "File test" giá 5.000 đ
+      - key: STRICT_AMOUNT
+        value: "1"
+      - key: PAYMENT_PREFIX
+        value: DH
+      - key: SEPAY_AUTH_MODE
+        value: apikey
+      # Các giá trị dưới đây Render sẽ hỏi bạn khi tạo (không ghi vào GitHub):
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: BANK_ACCOUNT_NUMBER
+        sync: false
+      - key: BANK_CODE
+        sync: false
+      - key: BANK_ACCOUNT_NAME
+        sync: false
+      - key: SEPAY_API_KEY
+        sync: false
+      - key: TEST_PRODUCT_TEXT
+        sync: false
