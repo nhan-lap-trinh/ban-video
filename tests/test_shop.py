@@ -434,7 +434,17 @@ class TestDownload(ShopTestCase):
         self.assertIn("Thầy cô Ơi!", body)
         self.assertNotIn("<script>", body)
         self.assertEqual(body.count("<text"), 4)
+        self.assertEqual(body.count("XEM THỬ"), 2)   # hàng "XEM THỬ" xen kẽ hàng thương hiệu
         self.assertEqual(body.count("<line"), 2)
+
+    def test_brand_badge_on_video_page(self):
+        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
+        self.assertNotIn("nhan-hieu", html)            # chưa đặt thương hiệu -> không có logo
+        self.app.config["WATERMARK_TEXT"] = "Thầy cô Ơi!"
+        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
+        self.assertIn('class="nhan-hieu"', html)
+        self.assertIn("Thầy cô Ơi!", html)
+        self.assertIn("localhost", html)               # địa chỉ web hiện dưới tên thương hiệu
 
 
 class TestAdmin(ShopTestCase):

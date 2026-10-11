@@ -66,6 +66,21 @@
   // Bấm đúp vào video cũng vào/thoát toàn màn hình
   video.addEventListener("dblclick", function () { nutToan.click(); });
 
+  // ---- Logo thương hiệu đổi góc mỗi 8 giây (mờ dần rồi hiện ở góc mới) ----
+  var nhanHieu = document.getElementById("nhan-hieu");
+  if (nhanHieu) {
+    var goc = 0;
+    setInterval(function () {
+      nhanHieu.classList.add("an");
+      setTimeout(function () {
+        nhanHieu.classList.remove("goc-" + goc);
+        goc = (goc + 1) % 4;
+        if (goc) nhanHieu.classList.add("goc-" + goc);
+        nhanHieu.classList.remove("an");
+      }, 600);
+    }, 8000);
+  }
+
   // ---- Rời tab hoặc chuyển sang cửa sổ/ứng dụng khác: dừng và che lại ----
   function che() {
     if (!video.paused) video.pause();

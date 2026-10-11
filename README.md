@@ -53,7 +53,7 @@ ban-video-ai/
 ├── scripts/
 │   ├── thiet_lap.py        ← tạo file .env lần đầu (khóa bí mật + tài khoản admin)
 │   └── gia_lap_webhook.py  ← giả lập SePay gửi webhook để test trên máy
-├── tests/test_shop.py      ← 66 bài test tự động cho các tình huống tiền
+├── tests/test_shop.py      ← 67 bài test tự động cho các tình huống tiền
 └── data/                   ← (tự tạo khi chạy) database + file video. KHÔNG đưa lên GitHub
 ```
 
@@ -144,7 +144,7 @@ Khi chạy thật, nên chuyển sang **HMAC-SHA256** (an toàn hơn): trên SeP
 python -m unittest discover -s tests -v
 ```
 
-66 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
+67 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
 
 **Mỗi lần sửa code liên quan đến tiền, chạy lại lệnh này. Tất cả phải OK.**
 
@@ -189,7 +189,8 @@ python -m unittest discover -s tests -v
 Không lớp nào chặn được quay màn hình tuyệt đối (kể cả DRM kiểu Netflix cũng không chắc chắn trên Chrome máy tính). Mục tiêu là làm khó và làm bản quay xấu đi:
 - Link xem thử có chữ ký, hết hạn sau `PREVIEW_LINK_SECONDS` (mặc định 30 phút).
 - Trình phát không có nút tải, chặn chuột phải, chặn cửa sổ nổi (picture-in-picture).
-- Hoa văn watermark (lưới hình thoi + chữ `WATERMARK_TEXT`) phủ kín video và trôi chậm, kể cả khi xem toàn màn hình.
+- Hoa văn watermark: lưới hình thoi, xen kẽ hàng "XEM THỬ" và hàng tên thương hiệu `WATERMARK_TEXT`, phủ kín video và trôi chậm.
+- Logo chữ thương hiệu + địa chỉ web ở góc video, đổi góc mỗi 8 giây.
 - Thanh điều khiển riêng: nút góc phải dưới vừa vào vừa thoát toàn màn hình.
 - Chuyển tab / chuyển cửa sổ: video tự dừng và bị che mờ.
 - Lớp quan trọng nhất vẫn là: video xem thử có watermark, chất lượng thấp, ngắn; video gốc không bao giờ phát trên web.

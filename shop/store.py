@@ -64,15 +64,15 @@ def video_detail(video_id):
 
 @bp.route("/hinh-mo.svg")
 def watermark_svg():
-    """Một ô hoa văn: lưới hình thoi + chữ thương hiệu. Trình duyệt lặp ô này
-    phủ kín video xem thử (giống mẫu watermark của shop)."""
-    text = current_app.config["WATERMARK_TEXT"] or "XEM THỬ"
+    """Một ô hoa văn: lưới hình thoi, xen kẽ 2 hàng chữ "XEM THỬ" và tên thương hiệu.
+    Trình duyệt lặp ô này phủ kín video xem thử."""
+    brand = current_app.config["WATERMARK_TEXT"] or "XEM THỬ"
     w, h = 300, 210
-    # Chữ đặt ở tâm 4 hình thoi chạm cạnh ô; phần bị cắt ở mép ô sẽ được ô bên cạnh vẽ tiếp
-    centers = [(w / 2, 0), (w / 2, h), (0, h / 2), (w, h / 2)]
-    texts = "".join(
-        f'<text x="{x:g}" y="{y:g}">{escape(text)}</text>' for x, y in centers
-    )
+    # Tâm 4 hình thoi chạm cạnh ô. Hai tâm trên/dưới thuộc cùng một hàng (hàng "XEM THỬ"),
+    # hai tâm trái/phải thuộc hàng xen kẽ (hàng thương hiệu). Phần chữ bị cắt ở mép ô
+    # được ô bên cạnh vẽ tiếp, nên ghép lại liền mạch.
+    rows = [((w / 2, 0), "XEM THỬ"), ((w / 2, h), "XEM THỬ"), ((0, h / 2), brand), ((w, h / 2), brand)]
+    texts = "".join(f'<text x="{x:g}" y="{y:g}">{escape(t)}</text>' for (x, y), t in rows)
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
         '<g stroke="rgba(185,185,185,0.7)" stroke-width="1.4">'
@@ -84,7 +84,7 @@ def watermark_svg():
         f"{texts}</g></svg>"
     )
     resp = current_app.response_class(svg, mimetype="image/svg+xml")
-    resp.headers["Cache-Control"] = "public, max-age=3600"
+    resp.headers["Cache-Control"] = "no-cache"  # đổi tên thương hiệu là thấy ngay
     return resp
 
 
