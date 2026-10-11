@@ -59,6 +59,10 @@ def load_config():
         "ORDER_EXPIRE_MINUTES": _env_int("ORDER_EXPIRE_MINUTES", 15),
         "DOWNLOAD_LINK_SECONDS": _env_int("DOWNLOAD_LINK_SECONDS", 300),
         "MAX_DOWNLOADS": _env_int("MAX_DOWNLOADS", 5),
+        # Link xem thử sống bao lâu (giây). Đủ để xem hết video xem thử, nhưng không dùng lại được lâu.
+        "PREVIEW_LINK_SECONDS": _env_int("PREVIEW_LINK_SECONDS", 1800),
+        # Chữ chạy trên video xem thử
+        "SHOP_NAME": os.environ.get("SHOP_NAME", "").strip(),
         # 1 = chỉ mở khóa khi chuyển ĐÚNG số tiền (thiếu hay dư đều không mở khóa)
         "STRICT_AMOUNT": os.environ.get("STRICT_AMOUNT", "1") != "0",
         "MAX_CONTENT_LENGTH": _env_int("MAX_UPLOAD_MB", 2048) * 1024 * 1024,
@@ -158,7 +162,7 @@ def create_app(test_config=None):
             # img-src cho phép mọi ảnh https: dịch vụ QR có thể chuyển tiếp sang máy chủ ảnh khác.
             # Ảnh không chạy được mã nên mở rộng chỗ này không ảnh hưởng an toàn.
             "default-src 'self'; img-src 'self' https: data:; "
-            "media-src 'self'; "
+            "media-src 'self' blob:; "
             "script-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; "
             "base-uri 'none'"
         )

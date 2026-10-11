@@ -10,13 +10,14 @@
   <p>Giá (đồng): <input name="price" required inputmode="numeric" autocomplete="off" data-gia
         placeholder="VD: 50.000" value="{{ request.form.get('price', '') }}"> đ</p>
   <p>Mô tả:<br><textarea name="description" rows="3" cols="50">{{ request.form.get('description', '') }}</textarea></p>
-  <p>File gốc (bí mật, chỉ tải sau khi trả tiền){% if config.ALLOW_TEST_FILES %} - đang test nên nhận cả file .txt{% endif %}:</p>
+  <p><b>Video gốc chất lượng cao</b> (bí mật, khách chỉ tải được sau khi trả tiền){% if config.ALLOW_TEST_FILES %} - đang bật chế độ test nên nhận cả file .txt{% endif %}:</p>
   <div class="dropzone">
     Kéo thả file vào đây, hoặc bấm để chọn file
-    <input type="file" name="original_file" required>
+    <input type="file" name="original_file" required
+           accept="video/*{% if config.ALLOW_TEST_FILES %},.txt{% endif %}">
     <div class="ten-file"></div>
   </div>
-  <p>File xem thử - không bắt buộc (công khai, nên là bản ngắn / chất lượng thấp / có watermark):</p>
+  <p><b>Video xem thử</b> có watermark, chất lượng thấp, nên ngắn (khách xem trên web trước khi mua; không bắt buộc):</p>
   <div class="dropzone">
     Kéo thả file vào đây, hoặc bấm để chọn file
     <input type="file" name="preview_file" accept="video/*">

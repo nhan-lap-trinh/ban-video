@@ -388,12 +388,41 @@ class TestDownload(ShopTestCase):
         token = payments.make_download_token(self.app.config, o)
         self.assertEqual(self.client.get(f"/tai/{token}").status_code, 403)
 
+    def preview_url(self):
+        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
+        return re.search(r'src="(/xem-thu/[^"]+)"', html).group(1)
+
     def test_original_not_reachable_via_preview_or_static(self):
-        for path in ("/preview/goc.mp4", "/preview/../originals/goc.mp4",
-                     "/static/../data/originals/goc.mp4", "/preview/%2e%2e/originals/goc.mp4"):
+        for path in ("/preview/goc.mp4", "/preview/thu.mp4", "/xem-thu/goc.mp4",
+                     "/static/../data/originals/goc.mp4", "/xem-thu/%2e%2e/originals/goc.mp4"):
             resp = self.client.get(path)
             self.assertNotEqual(resp.data, b"VIDEO-GOC-CHAT-LUONG-CAO", path)
-        self.assertEqual(self.client.get("/preview/thu.mp4").data, b"VIDEO-XEM-THU")
+            self.assertNotEqual(resp.data, b"VIDEO-XEM-THU", path)
+
+    def test_preview_signed_link_works_and_supports_seeking(self):
+        url = self.preview_url()
+        resp = self.client.get(url)
+        self.assertEqual(resp.data, b"VIDEO-XEM-THU")
+        self.assertEqual(resp.headers["Cache-Control"], "no-store")
+        part = self.client.get(url, headers={"Range": "bytes=0-4"})
+        self.assertEqual(part.status_code, 206)
+        self.assertEqual(part.data, b"VIDEO")
+
+    def test_preview_link_expires_and_cannot_be_forged(self):
+        url = self.preview_url()
+        self.assertEqual(self.client.get(url[:-3] + "xyz").status_code, 403)
+        self.app.config["PREVIEW_LINK_SECONDS"] = -1
+        self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_preview_stops_when_video_hidden(self):
+        url = self.preview_url()
+        self.db.execute("UPDATE videos SET is_active = 0")
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_video_page_player_protections(self):
+        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
+        for needle in ("nodownload", "disablePictureInPicture", "preview.js", "chu-chay", "XEM THỬ"):
+            self.assertIn(needle, html)
 
 
 class TestAdmin(ShopTestCase):

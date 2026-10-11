@@ -14,6 +14,8 @@ from flask import (
     url_for,
 )
 
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+
 from . import payments
 from .db import get_db, transaction
 
@@ -39,6 +41,10 @@ def index():
     return render_template("index.html", videos=videos)
 
 
+def _preview_serializer():
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt="preview-link")
+
+
 @bp.route("/video/<int:video_id>")
 def video_detail(video_id):
     video = get_db().execute(
@@ -46,19 +52,34 @@ def video_detail(video_id):
     ).fetchone()
     if video is None:
         abort(404)
-    return render_template("video.html", video=video)
+    preview_url = None
+    if video["preview_file"]:
+        # Link xem thử có chữ ký và hết hạn: copy link đem đi chỗ khác thì một lúc sau là hỏng
+        signed = _preview_serializer().dumps({"v": video["id"], "f": video["preview_file"]})
+        preview_url = url_for("store.preview_file", signed=signed)
+    return render_template("video.html", video=video, preview_url=preview_url)
 
 
-@bp.route("/preview/<path:filename>")
-def preview_file(filename):
-    # Chỉ phục vụ file xem thử của video đang bán. Thư mục file gốc nằm chỗ khác
-    # hoàn toàn nên không có cách nào lấy file gốc qua đường dẫn này.
+@bp.route("/xem-thu/<signed>")
+def preview_file(signed):
+    """Phát file xem thử. Chỉ chạy được với link còn hạn, của video đang bán.
+    Thư mục file gốc nằm chỗ khác hẳn nên không thể lấy file gốc qua đường này."""
+    try:
+        data = _preview_serializer().loads(signed, max_age=current_app.config["PREVIEW_LINK_SECONDS"])
+    except (BadSignature, SignatureExpired):
+        abort(403, description="Link xem thử đã hết hạn. Hãy tải lại trang video.")
+    if not isinstance(data, dict):
+        abort(403)
     row = get_db().execute(
-        "SELECT 1 FROM videos WHERE preview_file = ? AND is_active = 1", (filename,)
+        "SELECT preview_file FROM videos WHERE id = ? AND preview_file = ? AND is_active = 1",
+        (data.get("v"), data.get("f")),
     ).fetchone()
     if row is None:
         abort(404)
-    return send_from_directory(current_app.config["PREVIEW_DIR"], filename)
+    resp = send_from_directory(current_app.config["PREVIEW_DIR"], row["preview_file"])
+    resp.headers["Cache-Control"] = "no-store"
+    resp.headers["Content-Disposition"] = "inline"
+    return resp
 
 
 @bp.route("/mua/<int:video_id>", methods=["POST"])

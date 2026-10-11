@@ -6,7 +6,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 60
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 600
     autoDeploy: true
     envVars:
       - key: SECRET_KEY
@@ -39,4 +39,6 @@ services:
       - key: SEPAY_API_KEY
         sync: false
       - key: TEST_PRODUCT_TEXT
+        sync: false
+      - key: SHOP_NAME
         sync: false
