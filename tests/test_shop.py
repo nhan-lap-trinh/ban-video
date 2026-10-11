@@ -664,6 +664,9 @@ class TestBoomerangAndPaidPage(ShopTestCase):
         dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                                     "-of", "csv=p=0", str(loop_path)], capture_output=True, text=True).stdout)
         self.assertAlmostEqual(dur, 9.0, delta=0.5)   # 4,5 giây xuôi + 4,5 giây ngược
+        wh = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width,height",
+                             "-of", "csv=p=0", str(loop_path)], capture_output=True, text=True).stdout.strip()
+        self.assertEqual(wh, "854,480")                # khung ngang 16:9
         html = self.client.get("/").get_data(as_text=True)
         self.assertIn(f"/mau/{v['loop_file']}", html)
         self.assertIn("autoplay muted loop playsinline", html)

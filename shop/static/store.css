@@ -105,16 +105,16 @@
   color: var(--chu);
 }
 .dong-video:hover { background: var(--muc-tim-nhat); }
-/* Có đoạn mẫu: video nhỏ bên trái, chữ bên phải */
+/* Có đoạn mẫu: khung ngang 16:9 bên trái, chữ bên phải */
 .dong-video.co-mau {
-  grid-template-columns: 132px 1fr auto;
+  grid-template-columns: 300px 1fr auto;
   grid-template-areas: "mau ten gia" "mau nut nut";
   align-items: start;
 }
 .mau-video {
   grid-area: mau;
-  width: 132px;
-  aspect-ratio: 9 / 16;
+  width: 300px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: 10px;
   background: var(--giay-dam);
@@ -199,11 +199,11 @@
   .khung-qr { padding: 14px; }
   .khung-qr img { width: 100%; }
   .dong-video .nut-chinh { justify-self: stretch; }
+  /* Điện thoại: khung video rộng hết màn hình ở trên, chữ ở dưới */
   .dong-video.co-mau {
-    grid-template-columns: 112px 1fr;
-    grid-template-areas: "mau ten" "mau gia" "mau nut";
-    gap: 6px 14px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "mau mau" "ten gia" "nut nut";
+    gap: 10px 12px;
   }
-  .mau-video { width: 112px; }
-  .dong-video.co-mau .nut-chinh { align-self: end; }
+  .mau-video { width: 100%; }
 }

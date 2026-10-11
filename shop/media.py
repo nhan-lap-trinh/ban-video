@@ -1,7 +1,9 @@
 """Xử lý video bằng ffmpeg: cắt đoạn mẫu chạy "boomerang" cho trang danh sách video.
 
 Boomerang = đoạn 4,5 giây đầu của video XEM THỬ chạy xuôi rồi chạy ngược lại,
-lặp mãi. File nhỏ (rộng 320px, không có tiếng) nên trang chủ tải nhanh.
+lặp mãi. Khung ngang 16:9 như YouTube, 854x480 (480p), không có tiếng.
+Video dọc (kiểu Reels/TikTok) được đặt giữa khung, hai bên là chính video đó phóng to
+và làm mờ, nên không bị cắt mất nội dung và không có viền đen.
 Dùng video xem thử (đã có watermark), không bao giờ dùng video gốc.
 """
 
@@ -10,6 +12,15 @@ import subprocess
 from pathlib import Path
 
 LOOP_SECONDS = 4.5
+WIDTH, HEIGHT = 854, 480  # 16:9
+
+# Nền: phóng to cho phủ kín khung rồi làm mờ. Trên cùng: video thu vừa khung, đặt giữa.
+FRAME_16_9 = (
+    f"scale={WIDTH}:{HEIGHT}:force_original_aspect_ratio=increase,crop={WIDTH}:{HEIGHT},"
+    "boxblur=20:2,eq=brightness=-0.06[nen];"
+    f"[fg]scale={WIDTH}:{HEIGHT}:force_original_aspect_ratio=decrease[tren];"
+    "[nen][tren]overlay=(W-w)/2:(H-h)/2,setsar=1"
+)
 
 
 def find_ffmpeg():
@@ -41,16 +52,18 @@ def make_boomerang(src, out_dir, base_name, logger=None):
         "-an",                                           # bỏ tiếng: trình duyệt mới cho tự chạy
         "-filter_complex",
         # thu nhỏ, chia làm 2 nhánh, 1 nhánh quay ngược, rồi nối xuôi + ngược
-        "[0:v]fps=20,scale=320:-2,split[xuoi][b];[b]reverse[nguoc];"
+        # đưa về khung 16:9, chia 2 nhánh, 1 nhánh quay ngược, rồi nối xuôi + ngược
+        f"[0:v]fps=24,split[bg][fg];[bg]{FRAME_16_9},split[xuoi][b];[b]reverse[nguoc];"
         "[xuoi][nguoc]concat=n=2:v=1:a=0,format=yuv420p[v]",
         "-map", "[v]",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "30",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "23",   # crf càng nhỏ càng nét
         "-movflags", "+faststart",                       # phát được ngay khi mới tải một phần
         str(out_dir / loop_name),
     ]
     poster_cmd = [
         ffmpeg, "-y", "-loglevel", "error",
-        "-ss", "0.3", "-i", str(src), "-frames:v", "1", "-vf", "scale=320:-2",
+        "-ss", "0.3", "-i", str(src), "-frames:v", "1", "-q:v", "3",
+        "-filter_complex", f"[0:v]split[bg][fg];[bg]{FRAME_16_9}",
         str(out_dir / poster_name),
     ]
     try:

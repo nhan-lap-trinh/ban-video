@@ -17,7 +17,7 @@
   --vang-nhat: #fff6dc;     /* nền nhắc nhở */
   --bo-goc: 12px;
   --font: "Be Vietnam Pro", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-chu-ky: "Dancing Script", "Segoe Script", "Brush Script MT", cursive;
+  --font-chu-ky: "Imperial Script", "Segoe Script", "Brush Script MT", cursive;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -47,7 +47,7 @@ p { margin: 0 0 1em; }
 }
 .dau-trang .trong {
   position: relative;
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto;
   padding: 16px 20px 14px 56px;
   display: flex;
@@ -78,7 +78,20 @@ p { margin: 0 0 1em; }
 }
 .ten-shop:hover { color: var(--muc-tim-dam); }
 
-.noi-dung { max-width: 760px; margin: 0 auto; padding: 28px 20px 64px; }
+/* Logo SVG: chữ thư pháp + nét trang trí, cùng màu mực tím */
+.dau-trang .trong:has(.logo) { justify-content: center; }
+.logo { display: block; line-height: 0; text-shadow: none; }
+.logo-svg { width: 480px; max-width: 100%; height: auto; display: block; overflow: visible; }
+.logo-nho .logo-svg { width: 300px; }
+.logo-chu { font-family: var(--font-chu-ky); font-size: 104px; fill: var(--muc-tim); }
+.logo-net { stroke: var(--muc-tim); }
+.logo-to { fill: var(--muc-tim); }
+.logo-khe { stroke: #fff; stroke-width: 1; }
+.logo-lo { fill: #fff; }
+a.logo:hover .logo-chu, a.logo:hover .logo-to { fill: var(--muc-tim-dam); }
+a.logo:hover .logo-net { stroke: var(--muc-tim-dam); }
+
+.noi-dung { max-width: 860px; margin: 0 auto; padding: 28px 20px 64px; }
 
 /* ---------- Nút ---------- */
 .nut-chinh, .nut-phu, button.nut-chinh, button.nut-phu {
@@ -166,6 +179,7 @@ td.so, th.so { text-align: right; white-space: nowrap; }
   body { font-size: 18px; }
   h1 { font-size: 1.5rem; }
   .ten-shop { font-size: 2rem; }
+  .logo-svg { width: 320px; }
   .noi-dung { padding: 20px 16px 48px; }
   .dau-trang .trong { padding-left: 44px; }
   .dau-trang .trong::before { left: 26px; }

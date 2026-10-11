@@ -1,6 +1,7 @@
 /* Trang quản lý: dùng chung theme.css, thêm phần riêng ở đây. */
 .noi-dung.rong { max-width: 1040px; }
 .dau-trang .trong { max-width: 1040px; }
+.dau-trang .trong:has(.logo-nho) { justify-content: space-between; }
 .nhan-quan-ly {
   font-weight: 600;
   color: var(--chu-phu);

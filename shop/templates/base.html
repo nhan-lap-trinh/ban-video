@@ -6,7 +6,7 @@
   <title>{% block title %}{{ config.WATERMARK_TEXT or "Cửa hàng video" }}{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Dancing+Script:wght@700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Imperial+Script&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='store.css') }}">
   {% block head %}{% endblock %}
@@ -16,7 +16,9 @@
      kể cả khi trình duyệt này đang đăng nhập admin. #}
   <header class="dau-trang">
     <div class="trong">
-      <a class="ten-shop" href="{{ url_for('store.index') }}">{{ config.WATERMARK_TEXT or "Cửa hàng video" }}</a>
+      <a class="ten-shop logo" href="{{ url_for('store.index') }}">
+        {% with ten = config.WATERMARK_TEXT or "Cửa hàng video" %}{% include "_logo.html" %}{% endwith %}
+      </a>
     </div>
   </header>
   <main class="noi-dung">

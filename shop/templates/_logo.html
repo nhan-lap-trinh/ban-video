@@ -1,0 +1,43 @@
+{# Logo chữ "Thầy cô Ơi!" kiểu nét bút thư pháp: chữ font Imperial Script (copperplate),
+   bên dưới là nét lượn, cuốn sách mở, nhành lá; góc phải là ngòi bút máy.
+   textLength giữ chiều rộng chữ cố định để các nét trang trí luôn khớp, dù font nào hiển thị. #}
+<svg class="logo-svg" viewBox="0 0 700 214" role="img" aria-label="{{ ten }}">
+  <g class="logo-net" fill="none" stroke-linecap="round">
+    {# nét lượn từ ngòi bút vòng qua phía trên, chạy về cuối chữ #}
+    <path d="M626 58 C 676 30, 690 6, 652 8 C 612 10, 596 52, 548 66" stroke-width="1.6"/>
+    {# nét lượn lớn bên trái, vòng lên đầu chữ #}
+    <path d="M120 112 C 64 112, 30 86, 58 62 C 86 40, 140 54, 150 78" stroke-width="1.4"/>
+    {# hai nét lượn đan nhau dưới chữ #}
+    <path d="M28 158 C 116 116, 214 196, 350 172 S 586 128, 672 160" stroke-width="2.6"/>
+    <path d="M56 132 C 160 188, 258 156, 350 166 S 532 194, 650 128" stroke-width="1.4"/>
+    {# cuốn sách mở ở giữa #}
+    <path d="M350 188 C 322 168, 284 164, 248 171" stroke-width="2.6"/>
+    <path d="M350 188 C 378 168, 416 164, 452 171" stroke-width="2.6"/>
+    <path d="M348 181 C 322 162, 290 158, 260 162" stroke-width="1.3"/>
+    <path d="M352 181 C 378 162, 410 158, 440 162" stroke-width="1.3"/>
+    <path d="M346 174 C 324 157, 298 152, 274 154" stroke-width="1"/>
+    <path d="M354 174 C 376 157, 402 152, 426 154" stroke-width="1"/>
+    {# cành lá hai bên #}
+    <path d="M96 176 Q 132 166, 170 146" stroke-width="1.6"/>
+    <path d="M604 176 Q 568 166, 530 146" stroke-width="1.6"/>
+  </g>
+  <g class="logo-to">
+    {# lá hình giọt nước, xoay theo cành #}
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(112 170) rotate(-35)"/>
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(136 162) rotate(22)"/>
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(152 154) rotate(-60)"/>
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(588 170) rotate(215)"/>
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(564 162) rotate(158)"/>
+    <path d="M0 0 C 7 -9, 20 -9, 27 0 C 20 9, 7 9, 0 0Z" transform="translate(548 154) rotate(240)"/>
+    <circle cx="104" cy="186" r="3.2"/><circle cx="124" cy="150" r="3"/>
+    <circle cx="596" cy="186" r="3.2"/><circle cx="576" cy="150" r="3"/>
+    {# ngòi bút máy, đầu nhọn chĩa xuống trái, đặt ngoài chữ #}
+    <g transform="translate(624 64) rotate(-40)">
+      <path d="M0 0 L -9 -28 C -9 -38, 9 -38, 9 -28 Z"/>
+      <path d="M0 -5 L 0 -25" class="logo-khe"/>
+      <circle cx="0" cy="-21" r="2" class="logo-lo"/>
+    </g>
+  </g>
+  <text class="logo-chu" x="350" y="120" text-anchor="middle"
+        textLength="{{ 450 if ten|length > 8 else 340 }}" lengthAdjust="spacingAndGlyphs">{{ ten }}</text>
+</svg>
