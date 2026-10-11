@@ -437,14 +437,15 @@ class TestDownload(ShopTestCase):
         self.assertEqual(body.count("XEM THỬ"), 2)   # hàng "XEM THỬ" xen kẽ hàng thương hiệu
         self.assertEqual(body.count("<line"), 2)
 
-    def test_brand_badge_on_video_page(self):
-        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
-        self.assertNotIn("nhan-hieu", html)            # chưa đặt thương hiệu -> không có logo
+    def test_watermark_url_changes_with_brand_and_no_host_shown(self):
+        html1 = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
         self.app.config["WATERMARK_TEXT"] = "Thầy cô Ơi!"
-        html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
-        self.assertIn('class="nhan-hieu"', html)
-        self.assertIn("Thầy cô Ơi!", html)
-        self.assertIn("localhost", html)               # địa chỉ web hiện dưới tên thương hiệu
+        html2 = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
+        u1 = re.search(r'data-hinh="([^"]+)"', html1).group(1)
+        u2 = re.search(r'data-hinh="([^"]+)"', html2).group(1)
+        self.assertNotEqual(u1, u2)          # đổi chữ thương hiệu -> địa chỉ hình mới
+        self.assertIn("Thầy cô Ơi!", self.client.get(u2.replace("&amp;", "&")).get_data(as_text=True))
+        self.assertNotIn("localhost", html2.split("<form")[0].split("Xem thử")[1])  # không hiện địa chỉ web
 
 
 class TestAdmin(ShopTestCase):

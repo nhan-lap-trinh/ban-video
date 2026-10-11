@@ -1,5 +1,6 @@
 """Các trang dành cho KHÁCH HÀNG + địa chỉ nhận webhook của SePay."""
 
+import hashlib
 from pathlib import Path
 
 from markupsafe import escape
@@ -59,7 +60,11 @@ def video_detail(video_id):
         # Link xem thử có chữ ký và hết hạn: copy link đem đi chỗ khác thì một lúc sau là hỏng
         signed = _preview_serializer().dumps({"v": video["id"], "f": video["preview_file"]})
         preview_url = url_for("store.preview_file", signed=signed)
-    return render_template("video.html", video=video, preview_url=preview_url)
+    brand = current_app.config["WATERMARK_TEXT"] or ""
+    watermark_version = hashlib.sha256(brand.encode()).hexdigest()[:8]
+    return render_template(
+        "video.html", video=video, preview_url=preview_url, watermark_version=watermark_version
+    )
 
 
 @bp.route("/hinh-mo.svg")
@@ -84,7 +89,8 @@ def watermark_svg():
         f"{texts}</g></svg>"
     )
     resp = current_app.response_class(svg, mimetype="image/svg+xml")
-    resp.headers["Cache-Control"] = "no-cache"  # đổi tên thương hiệu là thấy ngay
+    # Địa chỉ hình có ?v=<mã theo chữ thương hiệu>, đổi chữ là đổi địa chỉ, nên lưu lâu cũng không sao
+    resp.headers["Cache-Control"] = "public, max-age=86400"
     return resp
 
 

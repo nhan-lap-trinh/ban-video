@@ -9,13 +9,7 @@
   <div class="khung-xem-thu" id="khung-xem-thu">
     <video id="video-xem-thu" src="{{ preview_url }}" preload="metadata" playsinline
            disablePictureInPicture disableRemotePlayback></video>
-    <div class="hoa-van" aria-hidden="true"></div>
-    {% if config.WATERMARK_TEXT %}
-    <div class="nhan-hieu" id="nhan-hieu" aria-hidden="true">
-      <span class="ten-thuong-hieu">{{ config.WATERMARK_TEXT }}</span>
-      <span class="dia-chi-web">{{ request.host }}</span>
-    </div>
-    {% endif %}
+    <div class="hoa-van" id="hoa-van" aria-hidden="true" data-hinh="{{ url_for('store.watermark_svg', v=watermark_version) }}"></div>
     <div class="man-che" id="man-che" hidden>Video tạm dừng. Bấm vào đây để xem tiếp.</div>
     <div class="thanh-dieu-khien">
       <button type="button" id="nut-phat" class="nut" aria-label="Phát">

@@ -190,7 +190,6 @@ Không lớp nào chặn được quay màn hình tuyệt đối (kể cả DRM 
 - Link xem thử có chữ ký, hết hạn sau `PREVIEW_LINK_SECONDS` (mặc định 30 phút).
 - Trình phát không có nút tải, chặn chuột phải, chặn cửa sổ nổi (picture-in-picture).
 - Hoa văn watermark: lưới hình thoi, xen kẽ hàng "XEM THỬ" và hàng tên thương hiệu `WATERMARK_TEXT`, phủ kín video và trôi chậm.
-- Logo chữ thương hiệu + địa chỉ web ở góc video, đổi góc mỗi 8 giây.
 - Thanh điều khiển riêng: nút góc phải dưới vừa vào vừa thoát toàn màn hình.
 - Chuyển tab / chuyển cửa sổ: video tự dừng và bị che mờ.
 - Lớp quan trọng nhất vẫn là: video xem thử có watermark, chất lượng thấp, ngắn; video gốc không bao giờ phát trên web.
