@@ -37,3 +37,44 @@
   }
   setTimeout(check, 3000);
 })();
+
+// Sau khi bấm "Tải video về máy": trang vẫn đứng yên (file tải về ở góc trình duyệt),
+// nên tự hỏi lại máy chủ còn bao nhiêu lượt tải và cập nhật con số ngay trên trang.
+(function () {
+  var khu = document.getElementById("khu-tai");
+  var nut = document.getElementById("nut-tai");
+  var box = document.getElementById("order");
+  if (!khu || !nut || !box) return;
+  var url = box.dataset.statusUrl;
+  var soLuot = document.getElementById("so-luot");
+  var dongLuot = document.getElementById("luot-tai");
+  var hetLuot = document.getElementById("het-luot");
+
+  function hien(conLai) {
+    khu.dataset.conLai = conLai;
+    if (soLuot) soLuot.textContent = conLai;
+    var het = conLai <= 0;
+    nut.hidden = het;
+    if (dongLuot) dongLuot.hidden = het;
+    if (hetLuot) hetLuot.hidden = !het;
+  }
+
+  nut.addEventListener("click", function () {
+    var truoc = parseInt(khu.dataset.conLai, 10);
+    var lan = 0;
+    function hoi() {
+      lan += 1;
+      fetch(url, { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (typeof d.downloads_left === "number" && d.downloads_left !== truoc) {
+            hien(d.downloads_left);
+          } else if (lan < 8) {
+            setTimeout(hoi, 1500);   // máy chủ chưa ghi nhận lượt tải -> hỏi lại sau
+          }
+        })
+        .catch(function () { if (lan < 8) setTimeout(hoi, 2000); });
+    }
+    setTimeout(hoi, 1200);
+  });
+})();

@@ -6,7 +6,14 @@
   <ul class="danh-sach-video">
   {% for v in videos %}
     <li>
-      <a class="dong-video" href="{{ url_for('store.video_detail', video_id=v.id) }}">
+      <a class="dong-video{% if v.loop_file %} co-mau{% endif %}" href="{{ url_for('store.video_detail', video_id=v.id) }}">
+        {% if v.loop_file %}
+        {# Đoạn mẫu 4,5 giây chạy xuôi rồi ngược, lặp mãi. Không tiếng nên trình duyệt cho tự chạy. #}
+        <video class="mau-video" src="{{ url_for('store.loop_file', name=v.loop_file) }}"
+               {% if v.poster_file %}poster="{{ url_for('store.loop_file', name=v.poster_file) }}"{% endif %}
+               autoplay muted loop playsinline preload="metadata" disablePictureInPicture
+               aria-hidden="true" tabindex="-1"></video>
+        {% endif %}
         <span class="ten-video">{{ v.title }}</span>
         <span class="gia">{{ v.price|vnd }}</span>
         <span class="nut-chinh nut-nho">Xem thử và mua</span>
@@ -15,6 +22,6 @@
   {% endfor %}
   </ul>
 {% else %}
-  <div class="thong-bao"><p>Hiện chưa có video nào. Mời bạn quay lại sau.</p></div>
+  <div class="thong-bao"><p>Hiện chưa có video nào. Mời thầy cô quay lại sau.</p></div>
 {% endif %}
 {% endblock %}

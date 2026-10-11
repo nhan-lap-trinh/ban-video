@@ -53,7 +53,7 @@ ban-video-ai/
 ├── scripts/
 │   ├── thiet_lap.py        ← tạo file .env lần đầu (khóa bí mật + tài khoản admin)
 │   └── gia_lap_webhook.py  ← giả lập SePay gửi webhook để test trên máy
-├── tests/test_shop.py      ← 67 bài test tự động cho các tình huống tiền
+├── tests/test_shop.py      ← 71 bài test tự động cho các tình huống tiền
 └── data/                   ← (tự tạo khi chạy) database + file video. KHÔNG đưa lên GitHub
 ```
 
@@ -144,7 +144,7 @@ Khi chạy thật, nên chuyển sang **HMAC-SHA256** (an toàn hơn): trên SeP
 python -m unittest discover -s tests -v
 ```
 
-67 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
+71 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
 
 **Mỗi lần sửa code liên quan đến tiền, chạy lại lệnh này. Tất cả phải OK.**
 
@@ -199,3 +199,10 @@ Không lớp nào chặn được quay màn hình tuyệt đối (kể cả DRM 
 - `shop/static/theme.css`: màu và kiểu chữ dùng chung (giấy vở, mực tím, bút đỏ cho giá tiền, xanh lá khi xong).
 - `shop/static/store.css`: trang khách hàng. `shop/static/admin.css`: trang quản lý.
 - Font: Be Vietnam Pro (chữ thường) và Dancing Script (chữ "Thầy cô Ơi!"), tải từ Google Fonts.
+
+## Đoạn mẫu boomerang trên trang chủ
+
+Khi đăng video có kèm **video xem thử**, web dùng ffmpeg cắt 4,5 giây đầu của video xem thử, ghép xuôi + ngược
+thành đoạn 9 giây chạy lặp (rộng 320px, không tiếng, khoảng 30-100 KB) và một ảnh bìa (`shop/media.py`).
+Máy không có ffmpeg thì dùng bản đóng gói sẵn của gói `imageio-ffmpeg` (đã có trong requirements.txt).
+Nếu cắt thất bại, video vẫn được đăng bình thường, chỉ là trang chủ không có đoạn mẫu.

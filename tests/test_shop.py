@@ -335,7 +335,7 @@ class TestWebhookMoney(ShopTestCase):
         url = f"/don-hang/{o['access_token']}/trang-thai"
         self.assertEqual(self.client.get(url).get_json(), {"status": "pending"})
         self.send(self.payload(o["payment_code"], 50000))
-        self.assertEqual(self.client.get(url).get_json(), {"status": "paid"})
+        self.assertEqual(self.client.get(url).get_json()["status"], "paid")
 
 
 class TestDownload(ShopTestCase):
@@ -632,6 +632,78 @@ class TestCustomAdminPath(ShopTestCase):
         with self.assertRaises(RuntimeError):
             create_app({"SECRET_KEY": "s" * 48, "DATABASE": str(self.tmp / "x.db"),
                         "ADMIN_PATH": "/a b"})
+
+
+class TestBoomerangAndPaidPage(ShopTestCase):
+    def make_real_preview(self):
+        import subprocess
+        out = self.tmp / "nguon.mp4"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi",
+                        "-i", "testsrc=duration=8:size=360x640:rate=24", "-pix_fmt", "yuv420p", str(out)],
+                       check=True)
+        return out
+
+    @unittest.skipUnless(shutil.which("ffmpeg"), "cần ffmpeg")
+    def test_upload_creates_boomerang_shown_on_home(self):
+        import subprocess
+        src = self.make_real_preview()
+        with self.client.session_transaction() as sess:
+            sess["_csrf"] = "tok"
+        self.client.post("/quan-ly/dang-nhap", data={"_csrf": "tok", "username": "admin",
+                                                    "password": "mat-khau-rat-manh"})
+        resp = self.client.post("/quan-ly/video", data={
+            "_csrf": self.csrf(), "title": "Có mẫu", "price": "50000",
+            "original_file": (io.BytesIO(b"goc"), "goc.mp4"),
+            "preview_file": (open(src, "rb"), "xemthu.mp4"),
+        }, content_type="multipart/form-data")
+        self.assertEqual(resp.status_code, 302)
+        v = self.db.execute("SELECT * FROM videos WHERE title = 'Có mẫu'").fetchone()
+        self.assertTrue(v["loop_file"].endswith(".mp4"))
+        self.assertTrue(v["poster_file"].endswith(".jpg"))
+        loop_path = self.tmp / "preview" / v["loop_file"]
+        dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                    "-of", "csv=p=0", str(loop_path)], capture_output=True, text=True).stdout)
+        self.assertAlmostEqual(dur, 9.0, delta=0.5)   # 4,5 giây xuôi + 4,5 giây ngược
+        html = self.client.get("/").get_data(as_text=True)
+        self.assertIn(f"/mau/{v['loop_file']}", html)
+        self.assertIn("autoplay muted loop playsinline", html)
+        self.assertEqual(self.client.get(f"/mau/{v['loop_file']}").status_code, 200)
+        self.assertEqual(self.client.get(f"/mau/{v['poster_file']}").status_code, 200)
+        # ẩn video -> đoạn mẫu cũng không xem được nữa
+        self.db.execute("UPDATE videos SET is_active = 0 WHERE id = ?", (v["id"],))
+        self.assertEqual(self.client.get(f"/mau/{v['loop_file']}").status_code, 404)
+
+    def test_loop_route_never_serves_other_files(self):
+        for name in ("thu.mp4", "goc.mp4", "..%2Foriginals%2Fgoc.mp4"):
+            self.assertEqual(self.client.get(f"/mau/{name}").status_code, 404, name)
+
+    def test_paid_page_texts_and_download_count_in_status(self):
+        o = self.buy()
+        html = self.client.get(f"/don-hang/{o['access_token']}").get_data(as_text=True)
+        self.assertNotIn("Đang chờ tiền về", html)
+        self.send(self.payload(o["payment_code"], 50000))
+        html = self.client.get(f"/don-hang/{o['access_token']}").get_data(as_text=True)
+        self.assertIn("Cảm ơn thầy cô đã mua", html)
+        self.assertIn("Tâm đã nhận 50.000 đ", html)
+        url = f"/don-hang/{o['access_token']}/trang-thai"
+        self.assertEqual(self.client.get(url).get_json(), {"status": "paid", "downloads_left": 3})
+        self.client.get(self.client.get(f"/don-hang/{o['access_token']}/tai").headers["Location"])
+        self.assertEqual(self.client.get(url).get_json()["downloads_left"], 2)
+
+    def test_old_database_gets_new_columns(self):
+        import sqlite3
+        old = self.tmp / "cu.db"
+        c = sqlite3.connect(old)
+        c.execute("CREATE TABLE videos (id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',"
+                  " price INTEGER NOT NULL, preview_file TEXT, original_file TEXT NOT NULL, is_active INTEGER NOT NULL DEFAULT 1,"
+                  " created_at TEXT NOT NULL DEFAULT (datetime('now')))")
+        c.close()
+        from shop.db import init_db
+        init_db(str(old))
+        c = sqlite3.connect(old)
+        cols = {r[1] for r in c.execute("PRAGMA table_info(videos)")}
+        c.close()
+        self.assertTrue({"loop_file", "poster_file"} <= cols)
 
 
 class TestRenderSetup(unittest.TestCase):

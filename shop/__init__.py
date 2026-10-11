@@ -63,6 +63,8 @@ def load_config():
         "PREVIEW_LINK_SECONDS": _env_int("PREVIEW_LINK_SECONDS", 1800),
         # Chữ chạy trên video xem thử
         "SHOP_NAME": os.environ.get("SHOP_NAME", "").strip(),
+        # Tên người bán, hiện ở câu "<tên> đã nhận ... đ" khi khách thanh toán xong
+        "SELLER_NAME": os.environ.get("SELLER_NAME", "Tâm").strip() or "Tâm",
         # Chữ trong hoa văn watermark phủ lên video xem thử (mặc định = SHOP_NAME)
         "WATERMARK_TEXT": (os.environ.get("WATERMARK_TEXT") or os.environ.get("SHOP_NAME") or "").strip(),
         # 1 = chỉ mở khóa khi chuyển ĐÚNG số tiền (thiếu hay dư đều không mở khóa)

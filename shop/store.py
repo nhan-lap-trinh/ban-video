@@ -39,7 +39,7 @@ def _get_order_by_token(token):
 @bp.route("/")
 def index():
     videos = get_db().execute(
-        "SELECT id, title, price FROM videos WHERE is_active = 1 ORDER BY id DESC"
+        "SELECT id, title, price, loop_file, poster_file FROM videos WHERE is_active = 1 ORDER BY id DESC"
     ).fetchall()
     return render_template("index.html", videos=videos)
 
@@ -65,6 +65,20 @@ def video_detail(video_id):
     return render_template(
         "video.html", video=video, preview_url=preview_url, watermark_version=watermark_version
     )
+
+
+@bp.route("/mau/<name>")
+def loop_file(name):
+    """Đoạn mẫu boomerang và ảnh bìa trên trang chủ. Chỉ phát file của video đang bán."""
+    row = get_db().execute(
+        "SELECT 1 FROM videos WHERE is_active = 1 AND (loop_file = ? OR poster_file = ?)",
+        (name, name),
+    ).fetchone()
+    if row is None:
+        abort(404)
+    resp = send_from_directory(current_app.config["PREVIEW_DIR"], name)
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
 
 
 @bp.route("/hinh-mo.svg")
@@ -155,7 +169,10 @@ def order_status(token):
     """Trang đơn hàng gọi địa chỉ này mỗi 3 giây để biết đã thanh toán chưa.
     Chỉ trả về trạng thái, không lộ thông tin gì khác."""
     order = _get_order_by_token(token)
-    resp = jsonify({"status": payments.order_display_status(order)})
+    data = {"status": payments.order_display_status(order)}
+    if order["status"] == "paid":
+        data["downloads_left"] = max(0, current_app.config["MAX_DOWNLOADS"] - order["download_count"])
+    resp = jsonify(data)
     resp.headers["Cache-Control"] = "no-store"
     return resp
 

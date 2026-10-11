@@ -75,5 +75,10 @@ def init_db(path):
     try:
         conn.execute("PRAGMA journal_mode = WAL")
         conn.executescript(schema)
+        # Database cũ (tạo trước khi có cột mới) -> thêm cột còn thiếu
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(videos)")}
+        for col in ("loop_file", "poster_file"):
+            if col not in cols:
+                conn.execute(f"ALTER TABLE videos ADD COLUMN {col} TEXT")
     finally:
         conn.close()

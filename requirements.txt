@@ -1,4 +1,6 @@
 Flask>=3.1,<4
 python-dotenv>=1.0
+# ffmpeg đóng gói sẵn (để cắt đoạn mẫu boomerang) - dùng khi máy chủ không có ffmpeg
+imageio-ffmpeg>=0.5
 # gunicorn chỉ dùng khi chạy trên máy chủ Linux (Render), Windows không cần
 gunicorn>=23; sys_platform != "win32"

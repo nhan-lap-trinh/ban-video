@@ -17,7 +17,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from . import payments
+from . import media, payments
 from .db import VN_TZ, get_db, transaction, utc_now
 from .security import admin_required, check_admin_credentials
 
@@ -157,11 +157,20 @@ def videos():
             preview_name = (
                 _save_upload(preview, current_app.config["PREVIEW_DIR"]) if has_preview else None
             )
+            loop_name = poster_name = None
+            if preview_name:
+                # Cắt đoạn mẫu 4,5 giây chạy boomerang cho trang chủ (từ video XEM THỬ)
+                preview_dir = current_app.config["PREVIEW_DIR"]
+                loop_name, poster_name = media.make_boomerang(
+                    Path(preview_dir) / preview_name, preview_dir,
+                    "mau-" + secrets.token_hex(12), current_app.logger,
+                )
             with transaction(db):
                 db.execute(
-                    "INSERT INTO videos (title, description, price, preview_file, original_file)"
-                    " VALUES (?, ?, ?, ?, ?)",
-                    (title, description, int(price_text), preview_name, original_name),
+                    "INSERT INTO videos (title, description, price, preview_file, original_file,"
+                    " loop_file, poster_file) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (title, description, int(price_text), preview_name, original_name,
+                     loop_name, poster_name),
                 )
             flash(f"Đã thêm sản phẩm: {title}")
             if is_ajax:

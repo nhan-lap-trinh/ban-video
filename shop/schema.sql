@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS videos (
     description   TEXT    NOT NULL DEFAULT '',
     price         INTEGER NOT NULL CHECK (price > 0),
     preview_file  TEXT,                       -- file xem thử (công khai)
+    loop_file     TEXT,                       -- đoạn mẫu boomerang 4,5 giây cho trang chủ
+    poster_file   TEXT,                       -- ảnh bìa của video
     original_file TEXT    NOT NULL,           -- file gốc (bí mật, chỉ tải qua link ký số)
     is_active     INTEGER NOT NULL DEFAULT 1, -- 1 = đang bán, 0 = ẩn
     created_at    TEXT    NOT NULL DEFAULT (datetime('now'))

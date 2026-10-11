@@ -15,11 +15,6 @@
     <p><a href="{{ qr_url }}" target="_blank" rel="noopener noreferrer">Không thấy mã QR? Mở ảnh mã QR</a></p>
   </div>
 
-  <div class="trang-thai-cho" id="status-line" role="status">
-    <span class="cham-nhap-nhay" aria-hidden="true"></span>
-    Đang chờ tiền về. Trang sẽ tự cập nhật, bạn không cần bấm gì.
-  </div>
-
   <h2>Hoặc chuyển khoản bằng tay</h2>
   <dl class="thong-tin-ck">
     <div><dt>Ngân hàng</dt><dd>{{ bank_code }}</dd></div>
@@ -42,21 +37,24 @@
   <div class="thanh-cong">
     <svg class="dau-tich" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="44"/><path d="M28 50 l13 13 l27 -29"/></svg>
     <h1>Thanh toán thành công!</h1>
-    <p>Cảm ơn bạn đã mua <b>{{ order.video_title }}</b>.<br>
-       Shop đã nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
+    <p>Cảm ơn thầy cô đã mua <b>{{ order.video_title }}</b>.<br>
+       {{ config.SELLER_NAME }} đã nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
   </div>
-  {% if downloads_left > 0 %}
-    <a class="nut-chinh nut-xanh nut-rong nut-tai" href="{{ url_for('store.start_download', token=order.access_token) }}">Tải video về máy</a>
-    <p class="chu-thich">Bạn còn {{ downloads_left }} lượt tải. Nên lưu lại địa chỉ trang này.</p>
-  {% else %}
-    <div class="thong-bao loi"><p>Đơn hàng đã hết lượt tải. Vui lòng liên hệ shop để được hỗ trợ.</p></div>
-  {% endif %}
+  <div id="khu-tai" data-con-lai="{{ downloads_left }}">
+    <a class="nut-chinh nut-xanh nut-rong nut-tai" id="nut-tai"
+       href="{{ url_for('store.start_download', token=order.access_token) }}"
+       {% if downloads_left <= 0 %}hidden{% endif %}>Tải video về máy</a>
+    <p class="chu-thich" id="luot-tai" {% if downloads_left <= 0 %}hidden{% endif %}>Thầy cô còn <b id="so-luot">{{ downloads_left }}</b> lượt tải. Nên lưu lại địa chỉ trang này.</p>
+    <div class="thong-bao loi" id="het-luot" {% if downloads_left > 0 %}hidden{% endif %}>
+      <p>Đơn hàng đã hết lượt tải. Thầy cô vui lòng liên hệ {{ config.SELLER_NAME }} để được hỗ trợ.</p>
+    </div>
+  </div>
 
 {% elif status == 'expired' %}
   <h1>Mã QR đã hết hạn</h1>
   <div class="thong-bao nhac">
-    <p>Nếu bạn <b>đã chuyển khoản</b>, đừng lo: tiền về là video tự mở. Hãy tải lại trang này sau vài phút.</p>
-    <p>Nếu bạn <b>chưa chuyển khoản</b>, hãy quay lại trang video và bấm <b>Mua video này</b> để lấy mã mới.</p>
+    <p>Nếu thầy cô <b>đã chuyển khoản</b>, đừng lo: tiền về là video tự mở. Hãy tải lại trang này sau vài phút.</p>
+    <p>Nếu thầy cô <b>chưa chuyển khoản</b>, hãy quay lại trang video và bấm <b>Mua video này</b> để lấy mã mới.</p>
   </div>
   <a class="nut-phu" href="{{ url_for('store.index') }}">Về danh sách video</a>
 {% else %}

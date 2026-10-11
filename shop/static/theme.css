@@ -21,6 +21,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; } /* luôn ẩn được, kể cả nút có display riêng */
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
