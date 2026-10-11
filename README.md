@@ -193,3 +193,9 @@ Không lớp nào chặn được quay màn hình tuyệt đối (kể cả DRM 
 - Thanh điều khiển riêng: nút góc phải dưới vừa vào vừa thoát toàn màn hình.
 - Chuyển tab / chuyển cửa sổ: video tự dừng và bị che mờ.
 - Lớp quan trọng nhất vẫn là: video xem thử có watermark, chất lượng thấp, ngắn; video gốc không bao giờ phát trên web.
+
+## Giao diện
+
+- `shop/static/theme.css`: màu và kiểu chữ dùng chung (giấy vở, mực tím, bút đỏ cho giá tiền, xanh lá khi xong).
+- `shop/static/store.css`: trang khách hàng. `shop/static/admin.css`: trang quản lý.
+- Font: Be Vietnam Pro (chữ thường) và Dancing Script (chữ "Thầy cô Ơi!"), tải từ Google Fonts.

@@ -1,0 +1,171 @@
+/* =========================================================================
+   Giao diện chung "Thầy cô Ơi!" - ý tưởng: trang vở học trò
+   (giấy trắng, dòng kẻ xanh, lề đỏ, mực tím). Chữ to, nút to, dễ bấm.
+   ========================================================================= */
+:root {
+  --giay: #fbfbfe;          /* nền: giấy vở */
+  --giay-dam: #f1f3fb;      /* nền khối phụ */
+  --dong-ke: #dce2f2;       /* đường kẻ, viền */
+  --muc-tim: #4b3a8f;       /* màu chính: mực tím */
+  --muc-tim-dam: #3a2c73;
+  --muc-tim-nhat: #ece9f7;
+  --chu: #1f2230;           /* chữ */
+  --chu-phu: #555a6e;       /* chữ phụ */
+  --but-do: #b8322a;        /* bút đỏ: giá tiền, lề vở */
+  --la: #2e7a4c;            /* xanh lá: đã xong */
+  --la-nhat: #e6f3ea;
+  --vang-nhat: #fff6dc;     /* nền nhắc nhở */
+  --bo-goc: 12px;
+  --font: "Be Vietnam Pro", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-chu-ky: "Dancing Script", "Segoe Script", "Brush Script MT", cursive;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--giay);
+  color: var(--chu);
+  font: 400 19px/1.6 var(--font);
+}
+img, video { max-width: 100%; }
+a { color: var(--muc-tim); text-underline-offset: 3px; }
+a:hover { color: var(--muc-tim-dam); }
+:focus-visible { outline: 3px solid var(--muc-tim); outline-offset: 3px; border-radius: 4px; }
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5em; color: var(--chu); }
+h1 { font-size: 1.75rem; font-weight: 700; }
+h2 { font-size: 1.35rem; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0 0 1em; }
+
+/* ---------- Đầu trang: một dải giấy vở có dòng kẻ và lề đỏ ---------- */
+.dau-trang {
+  border-bottom: 2px solid var(--dong-ke);
+  background: repeating-linear-gradient(#fff 0 27px, #e6eaf6 27px 28px);
+}
+.dau-trang .trong {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 20px 14px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+/* lề đỏ của trang vở, đi theo nội dung chứ không dính mép màn hình */
+.dau-trang .trong::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38px;
+  width: 2px;
+  background: var(--but-do);
+  opacity: 0.75;
+}
+.ten-shop {
+  font-family: var(--font-chu-ky);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--muc-tim);
+  text-decoration: none;
+  text-shadow: 0 0 6px #fff, 0 0 3px #fff, 0 0 1px #fff;
+}
+.ten-shop:hover { color: var(--muc-tim-dam); }
+
+.noi-dung { max-width: 760px; margin: 0 auto; padding: 28px 20px 64px; }
+
+/* ---------- Nút ---------- */
+.nut-chinh, .nut-phu, button.nut-chinh, button.nut-phu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 28px;
+  border-radius: var(--bo-goc);
+  font: 600 1.05rem/1.2 var(--font);
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid var(--muc-tim);
+  transition: background-color 0.15s, color 0.15s;
+}
+.nut-chinh { background: var(--muc-tim); color: #fff; }
+.nut-chinh:hover { background: var(--muc-tim-dam); border-color: var(--muc-tim-dam); color: #fff; }
+.nut-phu { background: #fff; color: var(--muc-tim); }
+.nut-phu:hover { background: var(--muc-tim-nhat); }
+.nut-rong { width: 100%; }
+.nut-xanh { background: var(--la); border-color: var(--la); color: #fff; }
+.nut-xanh:hover { background: #24613c; border-color: #24613c; color: #fff; }
+.nut-nho { min-height: 44px; padding: 8px 16px; font-size: 0.95rem; }
+
+/* ---------- Ô nhập ---------- */
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+.goi-y { display: block; font-weight: 400; color: var(--chu-phu); font-size: 0.9rem; }
+input[type="text"], input[type="password"], input:not([type]), textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  font: 400 1.05rem/1.4 var(--font);
+  color: var(--chu);
+  background: #fff;
+  border: 2px solid var(--dong-ke);
+  border-radius: 10px;
+}
+textarea { min-height: 96px; resize: vertical; }
+input:focus, textarea:focus { border-color: var(--muc-tim); outline: none; box-shadow: 0 0 0 3px var(--muc-tim-nhat); }
+.o-nhap { margin-bottom: 22px; }
+
+/* ---------- Khối thông báo ---------- */
+.thong-bao {
+  padding: 14px 18px;
+  border-radius: var(--bo-goc);
+  margin-bottom: 20px;
+  border-left: 6px solid var(--muc-tim);
+  background: var(--muc-tim-nhat);
+}
+.thong-bao.tot { border-color: var(--la); background: var(--la-nhat); }
+.thong-bao.loi { border-color: var(--but-do); background: #fbeceb; }
+.thong-bao.nhac { border-color: #c99a1a; background: var(--vang-nhat); }
+.thong-bao p:last-child { margin-bottom: 0; }
+
+/* ---------- Bảng ---------- */
+.bang-cuon { overflow-x: auto; border: 2px solid var(--dong-ke); border-radius: var(--bo-goc); background: #fff; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--dong-ke); }
+th { background: var(--giay-dam); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.so, th.so { text-align: right; white-space: nowrap; }
+
+.gia { color: var(--but-do); font-weight: 700; white-space: nowrap; }
+
+/* Dấu tích vẽ tay: dùng khi thanh toán xong / tải lên xong */
+.dau-tich { width: 96px; height: 96px; display: block; }
+.dau-tich circle { fill: var(--la-nhat); stroke: var(--la); stroke-width: 4; }
+.dau-tich path {
+  fill: none;
+  stroke: var(--la);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: ve-dau-tich 0.6s 0.15s ease-out forwards;
+}
+@keyframes ve-dau-tich { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; transition: none !important; }
+}
+@media (max-width: 560px) {
+  body { font-size: 18px; }
+  h1 { font-size: 1.5rem; }
+  .ten-shop { font-size: 2rem; }
+  .noi-dung { padding: 20px 16px 48px; }
+  .dau-trang .trong { padding-left: 44px; }
+  .dau-trang .trong::before { left: 26px; }
+}

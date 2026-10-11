@@ -445,7 +445,7 @@ class TestDownload(ShopTestCase):
         u2 = re.search(r'data-hinh="([^"]+)"', html2).group(1)
         self.assertNotEqual(u1, u2)          # đổi chữ thương hiệu -> địa chỉ hình mới
         self.assertIn("Thầy cô Ơi!", self.client.get(u2.replace("&amp;", "&")).get_data(as_text=True))
-        self.assertNotIn("localhost", html2.split("<form")[0].split("Xem thử")[1])  # không hiện địa chỉ web
+        self.assertNotIn("localhost", html2)  # không hiện địa chỉ web trên trang
 
 
 class TestAdmin(ShopTestCase):
@@ -466,7 +466,7 @@ class TestAdmin(ShopTestCase):
         self.assertEqual(self.login().status_code, 302)
         html = self.client.get("/quan-ly/").get_data(as_text=True)
         self.assertIn("50.000 đ", html)
-        self.assertIn("Có 1 giao dịch cần xem lại", html)
+        self.assertIn("Có 1 khoản tiền cần xem lại", html)
         self.assertEqual(self.client.get("/quan-ly/giao-dich?can-xem=1").status_code, 200)
         self.assertEqual(self.client.get("/quan-ly/don-hang").status_code, 200)
 
@@ -584,7 +584,7 @@ class TestAdminSeparation(ShopTestCase):
     def test_admin_pages_have_admin_nav(self):
         self.login()
         html = self.client.get("/quan-ly/").get_data(as_text=True)
-        self.assertIn("TRANG QUẢN LÝ", html)
+        self.assertIn("Trang quản lý", html)
         self.assertIn("Đăng xuất", html)
         self.assertIn("admin.js", html)
         self.assertIn("noindex", html)

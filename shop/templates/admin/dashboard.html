@@ -2,26 +2,42 @@
 {% block title %}Doanh thu{% endblock %}
 {% block content %}
 <h1>Doanh thu</h1>
-<table border="1" cellpadding="6">
-  <tr><th></th><th>Số đơn</th><th>Tiền thực nhận</th></tr>
-  <tr><td>Hôm nay</td><td>{{ stats.today[0] }}</td><td>{{ stats.today[1]|vnd }}</td></tr>
-  <tr><td>Tháng này</td><td>{{ stats.month[0] }}</td><td>{{ stats.month[1]|vnd }}</td></tr>
-  <tr><td>Tất cả</td><td>{{ stats.all[0] }}</td><td>{{ stats.all[1]|vnd }}</td></tr>
-</table>
-<p>Giờ tính theo giờ Việt Nam. Hãy đối chiếu định kỳ với <b>sao kê ngân hàng</b>.</p>
 
 {% if review_count %}
-  <p><b>Có {{ review_count }} giao dịch cần xem lại</b> (thiếu tiền, dư tiền, không khớp mã...):
-     <a href="{{ url_for('admin.transactions') }}?can-xem=1">xem ngay</a></p>
-{% else %}
-  <p>Không có giao dịch nào cần xem lại.</p>
+  <div class="thong-bao nhac">
+    <p><b>Có {{ review_count }} khoản tiền cần xem lại</b> (khách chuyển thiếu, chuyển dư hoặc ghi sai nội dung).</p>
+    <p><a class="nut-phu nut-nho" href="{{ url_for('admin.transactions') }}?can-xem=1">Xem các khoản này</a></p>
+  </div>
 {% endif %}
 
-<h2>14 ngày gần nhất có doanh thu</h2>
+<div class="o-so-lieu">
+  <div class="so-lieu">
+    <span class="nhan-so-lieu">Hôm nay</span>
+    <span class="con-so">{{ stats.today[1]|vnd }}</span>
+    <span class="phu">{{ stats.today[0] }} đơn</span>
+  </div>
+  <div class="so-lieu">
+    <span class="nhan-so-lieu">Tháng này</span>
+    <span class="con-so">{{ stats.month[1]|vnd }}</span>
+    <span class="phu">{{ stats.month[0] }} đơn</span>
+  </div>
+  <div class="so-lieu">
+    <span class="nhan-so-lieu">Từ trước tới nay</span>
+    <span class="con-so">{{ stats.all[1]|vnd }}</span>
+    <span class="phu">{{ stats.all[0] }} đơn</span>
+  </div>
+</div>
+<p class="chu-thich">Số tiền là tiền thực nhận, tính theo giờ Việt Nam. Thỉnh thoảng nên so với sao kê ngân hàng.</p>
+
+<h2>Các ngày có bán được</h2>
 {% if daily %}
-<table border="1" cellpadding="6">
-  <tr><th>Ngày</th><th>Số đơn</th><th>Tiền</th></tr>
-  {% for d in daily %}<tr><td>{{ d.day }}</td><td>{{ d.n }}</td><td>{{ d.total|vnd }}</td></tr>{% endfor %}
+<div class="bang-cuon">
+<table>
+  <tr><th>Ngày</th><th class="so">Số đơn</th><th class="so">Tiền nhận</th></tr>
+  {% for d in daily %}<tr><td>{{ d.day }}</td><td class="so">{{ d.n }}</td><td class="so">{{ d.total|vnd }}</td></tr>{% endfor %}
 </table>
-{% else %}<p>Chưa có đơn nào được thanh toán.</p>{% endif %}
+</div>
+{% else %}
+<div class="thong-bao"><p>Chưa có đơn nào được thanh toán. Khi có khách mua, số liệu sẽ hiện ở đây.</p></div>
+{% endif %}
 {% endblock %}

@@ -8,7 +8,7 @@
 ## Cách làm việc
 - Chủ dự án là học sinh đang học Python: luôn giải thích bằng tiếng Việt vì sao code hoạt động như vậy.
 - Làm từng bước nhỏ, chỉ làm đúng phạm vi được yêu cầu, không tự làm trước các bước sau.
-- Giao diện giữ nền trắng chữ đen cho đến khi chủ dự án yêu cầu trang trí.
+- Giao diện: chủ đề "trang vở học trò" (static/theme.css). Người dùng là thầy cô lớn tuổi và mẹ chủ dự án: chữ to, nút to, tối giản, tiếng Việt dễ hiểu.
 - Mỗi khi xong một thay đổi: chạy `python -m unittest discover -s tests` (phải OK hết) rồi commit Git, mô tả tiếng Việt không dấu.
 
 ## Quy tắc về tiền (không được phá vỡ)

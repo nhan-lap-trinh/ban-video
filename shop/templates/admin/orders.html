@@ -1,23 +1,25 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}Đơn hàng{% endblock %}
 {% block content %}
-<h1>Đơn hàng (300 đơn gần nhất)</h1>
+<h1>Đơn hàng</h1>
+<p class="chu-thich">300 đơn gần nhất, đơn mới ở trên cùng.</p>
 {% set labels = {'pending': 'Chờ thanh toán', 'paid': 'Đã thanh toán', 'expired': 'Hết hạn', 'cancelled': 'Đã hủy'} %}
-<table border="1" cellpadding="6">
-  <tr><th>Mã thanh toán</th><th>Video</th><th>Giá</th><th>Trạng thái</th><th>Tạo lúc</th><th>Thanh toán lúc</th><th>Tiền nhận</th><th>Lượt tải</th></tr>
+<div class="bang-cuon">
+<table>
+  <tr><th>Mã đơn</th><th>Video</th><th class="so">Giá</th><th>Trạng thái</th><th>Tạo lúc</th><th>Trả tiền lúc</th><th class="so">Lượt tải</th></tr>
   {% for o, st in items %}
   <tr>
-    <td>{{ o.payment_code }}</td>
+    <td><b>{{ o.payment_code }}</b></td>
     <td>{{ o.video_title }}</td>
-    <td>{{ o.amount|vnd }}</td>
-    <td>{{ labels.get(st, st) }}</td>
+    <td class="so">{{ o.amount|vnd }}</td>
+    <td><span class="nhan nhan-{{ st }}">{{ labels.get(st, st) }}</span></td>
     <td>{{ o.created_at|vntime }}</td>
     <td>{{ o.paid_at|vntime }}</td>
-    <td>{{ o.paid_amount|vnd }}</td>
-    <td>{{ o.download_count }}</td>
+    <td class="so">{{ o.download_count }}</td>
   </tr>
   {% else %}
-  <tr><td colspan="8">Chưa có đơn hàng.</td></tr>
+  <tr><td colspan="7">Chưa có đơn hàng nào.</td></tr>
   {% endfor %}
 </table>
+</div>
 {% endblock %}

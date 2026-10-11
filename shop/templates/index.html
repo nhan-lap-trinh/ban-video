@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Video AI</h1>
+<h1>Video đang bán</h1>
+<p class="loi-dan">Bấm vào một video để xem thử trước khi mua.</p>
 {% if videos %}
-  <ul>
+  <ul class="danh-sach-video">
   {% for v in videos %}
-    <li><a href="{{ url_for('store.video_detail', video_id=v.id) }}">{{ v.title }}</a> - {{ v.price|vnd }}</li>
+    <li>
+      <a class="dong-video" href="{{ url_for('store.video_detail', video_id=v.id) }}">
+        <span class="ten-video">{{ v.title }}</span>
+        <span class="gia">{{ v.price|vnd }}</span>
+        <span class="nut-chinh nut-nho">Xem thử và mua</span>
+      </a>
+    </li>
   {% endfor %}
   </ul>
 {% else %}
-  <p>Chưa có video nào đang bán.</p>
+  <div class="thong-bao"><p>Hiện chưa có video nào. Mời bạn quay lại sau.</p></div>
 {% endif %}
 {% endblock %}

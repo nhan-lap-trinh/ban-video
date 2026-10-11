@@ -94,9 +94,12 @@ function ganFormTaiLen(form) {
   function hienLoi(danhSach) {
     hopLoi.textContent = "";
     danhSach.forEach(function (loi) {
+      var khung = document.createElement("div");
+      khung.className = "thong-bao loi";
       var p = document.createElement("p");
       p.textContent = loi;            // textContent: không bao giờ chèn HTML lạ vào trang
-      hopLoi.appendChild(p);
+      khung.appendChild(p);
+      hopLoi.appendChild(khung);
     });
     hopLoi.scrollIntoView({ block: "center" });
   }
@@ -107,6 +110,8 @@ function ganFormTaiLen(form) {
     if (dangGui) return;               // chặn bấm 2 lần tạo 2 sản phẩm
     dangGui = true;
     hopLoi.textContent = "";
+    document.getElementById("dang-tai").hidden = false;
+    document.getElementById("da-xong").hidden = true;
     phanTram.textContent = "0%";
     thanh.value = 0;
     lop.hidden = false;
@@ -118,14 +123,18 @@ function ganFormTaiLen(form) {
       if (!ev.lengthComputable) return;
       var pt = Math.floor((ev.loaded / ev.total) * 100);
       thanh.value = pt;
-      phanTram.textContent = pt < 100 ? pt + "%" : "100% - đang lưu, sắp xong...";
+      phanTram.textContent = pt < 100 ? pt + "%" : "100%";
+      if (pt >= 100) document.querySelector("#dang-tai .tieu-de-cho").textContent = "Đang lưu video, sắp xong...";
     });
     xhr.addEventListener("load", function () {
       var data = null;
       try { data = JSON.parse(xhr.responseText); } catch (err) {}
       if (xhr.status === 200 && data && data.ok) {
         dangGui = false;                        // xong rồi, không cần hỏi khi rời trang nữa
-        window.location.href = data.redirect;   // về lại trang danh sách, có thông báo "Đã thêm"
+        // Đổi vòng xoay thành dấu tích, để người dùng thấy rõ là đã xong rồi mới chuyển trang
+        document.getElementById("dang-tai").hidden = true;
+        document.getElementById("da-xong").hidden = false;
+        setTimeout(function () { window.location.href = data.redirect; }, 1500);
         return;
       }
       dangGui = false;

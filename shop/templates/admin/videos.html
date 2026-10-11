@@ -1,69 +1,87 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Quản lý video<div class="lop-cho" id="lop-cho" hidden>
-  <div class="hop-cho">
-    <div class="vong-xoay" aria-hidden="true"></div>
-    <p><b>Đang tải video lên, vui lòng chờ...</b></p>
-    <p id="phan-tram">0%</p>
-    <progress id="thanh-tien-trinh" max="100" value="0"></progress>
-    <p>Đừng đóng hoặc tải lại trang trong lúc này.</p>
-  </div>
-</div>
-{% endblock %}
+{% block title %}Video{% endblock %}
 {% block content %}
 <h1>Video</h1>
-<h2>Thêm video mới</h2>
-{% for e in errors %}<p><b>{{ e }}</b></p>{% endfor %}
-<div id="loi-tai-len"></div>
-<form method="post" enctype="multipart/form-data" id="form-tai-video">
-  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-  <p>Tên video: <input name="title" required maxlength="200" value="{{ request.form.get('title', '') }}"></p>
-  <p>Giá (đồng): <input name="price" required inputmode="numeric" autocomplete="off" data-gia
-        placeholder="VD: 50.000" value="{{ request.form.get('price', '') }}"> đ</p>
-  <p>Mô tả:<br><textarea name="description" rows="3" cols="50">{{ request.form.get('description', '') }}</textarea></p>
-  <p><b>Video gốc chất lượng cao</b> (bí mật, khách chỉ tải được sau khi trả tiền){% if config.ALLOW_TEST_FILES %} - đang bật chế độ test nên nhận cả file .txt{% endif %}:</p>
-  <div class="dropzone">
-    Kéo thả file vào đây, hoặc bấm để chọn file
-    <input type="file" name="original_file" required
-           accept="video/*{% if config.ALLOW_TEST_FILES %},.txt{% endif %}">
-    <div class="ten-file"></div>
-  </div>
-  <p><b>Video xem thử</b> có watermark, chất lượng thấp, nên ngắn (khách xem trên web trước khi mua; không bắt buộc):</p>
-  <div class="dropzone">
-    Kéo thả file vào đây, hoặc bấm để chọn file
-    <input type="file" name="preview_file" accept="video/*">
-    <div class="ten-file"></div>
-  </div>
-  <button type="submit">Thêm video</button>
-</form>
 
-<h2>Danh sách video</h2>
-<table border="1" cellpadding="6">
-  <tr><th>ID</th><th>Tên</th><th>Giá</th><th>Đã bán</th><th>Trạng thái</th><th></th></tr>
+<section class="khoi-them">
+  <h2>Thêm video mới</h2>
+  {% for e in errors %}<div class="thong-bao loi"><p>{{ e }}</p></div>{% endfor %}
+  <div id="loi-tai-len"></div>
+  <form method="post" enctype="multipart/form-data" id="form-tai-video">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="o-nhap">
+      <label for="title">Tên video</label>
+      <input id="title" name="title" required maxlength="200" value="{{ request.form.get('title', '') }}">
+    </div>
+    <div class="o-nhap o-gia">
+      <label for="price">Giá bán</label>
+      <span class="nhap-gia"><input id="price" name="price" required inputmode="numeric" autocomplete="off" data-gia
+             placeholder="Ví dụ 50.000" value="{{ request.form.get('price', '') }}"><span class="don-vi">đồng</span></span>
+    </div>
+    <div class="o-nhap">
+      <label for="description">Mô tả <span class="goi-y">Không bắt buộc. Khách sẽ đọc dòng này dưới video.</span></label>
+      <textarea id="description" name="description" rows="3">{{ request.form.get('description', '') }}</textarea>
+    </div>
+
+    <div class="o-nhap">
+      <label>Video bán cho khách
+        <span class="goi-y">Bản rõ nét, không watermark. Khách chỉ tải được sau khi trả tiền.{% if config.ALLOW_TEST_FILES %} Đang bật chế độ thử nên nhận cả file .txt.{% endif %}</span></label>
+      <div class="dropzone">
+        <span class="chu-keo-tha">Kéo video thả vào đây, hoặc bấm để chọn</span>
+        <input type="file" name="original_file" required
+               accept="video/*{% if config.ALLOW_TEST_FILES %},.txt{% endif %}">
+        <div class="ten-file"></div>
+      </div>
+    </div>
+    <div class="o-nhap">
+      <label>Video xem thử
+        <span class="goi-y">Bản ngắn, có watermark. Khách xem trên web trước khi mua. Không bắt buộc.</span></label>
+      <div class="dropzone">
+        <span class="chu-keo-tha">Kéo video thả vào đây, hoặc bấm để chọn</span>
+        <input type="file" name="preview_file" accept="video/*">
+        <div class="ten-file"></div>
+      </div>
+    </div>
+    <button type="submit" class="nut-chinh">Thêm video</button>
+  </form>
+</section>
+
+<h2>Video đã đăng</h2>
+<div class="bang-cuon">
+<table>
+  <tr><th>Tên video</th><th class="so">Giá</th><th class="so">Đã bán</th><th>Trạng thái</th><th></th></tr>
   {% for v in videos %}
   <tr>
-    <td>{{ v.id }}</td>
-    <td><a href="{{ url_for('store.video_detail', video_id=v.id) }}">{{ v.title }}</a></td>
-    <td>{{ v.price|vnd }}</td>
-    <td>{{ v.sold }}</td>
-    <td>{{ 'Đang bán' if v.is_active else 'Đang ẩn' }}</td>
+    <td><a href="{{ url_for('store.video_detail', video_id=v.id) }}" target="_blank" rel="noopener">{{ v.title }}</a></td>
+    <td class="so">{{ v.price|vnd }}</td>
+    <td class="so">{{ v.sold }}</td>
+    <td><span class="nhan {{ 'nhan-paid' if v.is_active else 'nhan-expired' }}">{{ 'Đang bán' if v.is_active else 'Đang ẩn' }}</span></td>
     <td>
       <form method="post" action="{{ url_for('admin.toggle_video', video_id=v.id) }}">
         <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-        <button type="submit">{{ 'Ẩn' if v.is_active else 'Bán lại' }}</button>
+        <button type="submit" class="nut-phu nut-nho">{{ 'Ẩn khỏi cửa hàng' if v.is_active else 'Bán lại' }}</button>
       </form>
     </td>
   </tr>
   {% else %}
-  <tr><td colspan="6">Chưa có video.</td></tr>
+  <tr><td colspan="5">Chưa có video nào. Hãy thêm video đầu tiên ở trên.</td></tr>
   {% endfor %}
 </table>
+</div>
+
 <div class="lop-cho" id="lop-cho" hidden>
-  <div class="hop-cho">
-    <div class="vong-xoay" aria-hidden="true"></div>
-    <p><b>Đang tải video lên, vui lòng chờ...</b></p>
-    <p id="phan-tram">0%</p>
-    <progress id="thanh-tien-trinh" max="100" value="0"></progress>
-    <p>Đừng đóng hoặc tải lại trang trong lúc này.</p>
+  <div class="hop-cho" role="status">
+    <div id="dang-tai">
+      <div class="vong-xoay" aria-hidden="true"></div>
+      <p class="tieu-de-cho">Đang tải video lên...</p>
+      <p id="phan-tram" class="phan-tram">0%</p>
+      <progress id="thanh-tien-trinh" max="100" value="0"></progress>
+      <p class="chu-thich">Xin đừng đóng hoặc tải lại trang trong lúc này.</p>
+    </div>
+    <div id="da-xong" hidden>
+      <svg class="dau-tich" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="44"/><path d="M28 50 l13 13 l27 -29"/></svg>
+      <p class="tieu-de-cho xong">Đã tải lên xong!</p>
+    </div>
   </div>
 </div>
 {% endblock %}

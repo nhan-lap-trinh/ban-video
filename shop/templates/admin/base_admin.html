@@ -4,30 +4,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>{% block title %}Quản lý{% endblock %} - Quản lý shop</title>
+  <title>{% block title %}Quản lý{% endblock %} - Quản lý cửa hàng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Dancing+Script:wght@700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 </head>
-<body>
-  <p><b>TRANG QUẢN LÝ</b>
+<body class="trang-quan-ly">
+  <header class="dau-trang">
+    <div class="trong">
+      <span class="ten-shop">{{ config.WATERMARK_TEXT or "Cửa hàng" }}</span>
+      <span class="nhan-quan-ly">Trang quản lý</span>
+    </div>
+  </header>
   {% if session.get('is_admin') %}
-    | <a href="{{ url_for('admin.dashboard') }}">Doanh thu</a>
-    | <a href="{{ url_for('admin.videos') }}">Video</a>
-    | <a href="{{ url_for('admin.orders') }}">Đơn hàng</a>
-    | <a href="{{ url_for('admin.transactions') }}">Giao dịch</a>
-    | <a href="{{ url_for('store.index') }}" target="_blank" rel="noopener">Xem cửa hàng ↗</a>
-  </p>
-  <form method="post" action="{{ url_for('admin.logout') }}">
-    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-    <button type="submit">Đăng xuất</button>
-  </form>
-  {% else %}
-  </p>
+  {% set dang_o = request.endpoint %}
+  <nav class="menu-quan-ly" aria-label="Menu quản lý">
+    <div class="trong">
+      <a href="{{ url_for('admin.dashboard') }}" {% if dang_o == 'admin.dashboard' %}aria-current="page"{% endif %}>Doanh thu</a>
+      <a href="{{ url_for('admin.videos') }}" {% if dang_o == 'admin.videos' %}aria-current="page"{% endif %}>Video</a>
+      <a href="{{ url_for('admin.orders') }}" {% if dang_o == 'admin.orders' %}aria-current="page"{% endif %}>Đơn hàng</a>
+      <a href="{{ url_for('admin.transactions') }}" {% if dang_o == 'admin.transactions' %}aria-current="page"{% endif %}>Tiền vào</a>
+      <span class="day-phai">
+        <a class="lien-ket-phu" href="{{ url_for('store.index') }}" target="_blank" rel="noopener">Xem cửa hàng</a>
+        <form method="post" action="{{ url_for('admin.logout') }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button type="submit" class="nut-phu nut-nho">Đăng xuất</button>
+        </form>
+      </span>
+    </div>
+  </nav>
   {% endif %}
-  <hr>
-  {% for message in get_flashed_messages() %}
-    <p><b>{{ message }}</b></p>
-  {% endfor %}
-  {% block content %}{% endblock %}
+  <main class="noi-dung rong">
+    {% for message in get_flashed_messages() %}
+      <div class="thong-bao tot"><p>{{ message }}</p></div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
   <script src="{{ url_for('static', filename='admin.js') }}"></script>
 </body>
 </html>

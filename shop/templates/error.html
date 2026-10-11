@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Lỗi {{ code }}{% endblock %}
+{% block title %}Có lỗi xảy ra{% endblock %}
 {% block content %}
-<h1>Lỗi {{ code }}</h1>
-<p>{{ message }}</p>
+<h1>{% if code == 404 %}Không tìm thấy trang này{% else %}Có lỗi xảy ra{% endif %}</h1>
+<div class="thong-bao loi"><p>{{ message }}</p></div>
+<a class="nut-phu" href="{{ url_for('store.index') }}">Về trang chủ</a>
 {% endblock %}

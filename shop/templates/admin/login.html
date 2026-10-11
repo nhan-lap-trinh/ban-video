@@ -1,12 +1,20 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Đăng nhập quản lý{% endblock %}
+{% block title %}Đăng nhập{% endblock %}
 {% block content %}
-<h1>Đăng nhập quản lý</h1>
-{% if error %}<p><b>{{ error }}</b></p>{% endif %}
-<form method="post">
-  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-  <p>Tên đăng nhập: <input name="username" autocomplete="username" required></p>
-  <p>Mật khẩu: <input name="password" type="password" autocomplete="current-password" required></p>
-  <button type="submit">Đăng nhập</button>
-</form>
+<div class="hop-dang-nhap">
+  <h1>Đăng nhập</h1>
+  {% if error %}<div class="thong-bao loi"><p>{{ error }}</p></div>{% endif %}
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="o-nhap">
+      <label for="username">Tên đăng nhập</label>
+      <input id="username" name="username" autocomplete="username" autocapitalize="off" required>
+    </div>
+    <div class="o-nhap">
+      <label for="password">Mật khẩu</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="nut-chinh nut-rong">Đăng nhập</button>
+  </form>
+</div>
 {% endblock %}

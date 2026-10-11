@@ -1,44 +1,67 @@
 {% extends "base.html" %}
 {% block title %}Đơn hàng {{ order.payment_code }}{% endblock %}
 {% block content %}
-<h1>Đơn hàng</h1>
-<p>Video: <b>{{ order.video_title }}</b></p>
-<p>Số tiền: <b>{{ order.amount|vnd }}</b></p>
-<p><i>Lưu lại địa chỉ trang này để tải video sau khi thanh toán.</i></p>
-
 <div id="order" data-status-url="{{ url_for('store.order_status', token=order.access_token) }}"
      data-status="{{ status }}" data-expires="{{ order.expires_at }}">
 
 {% if status == 'pending' %}
-  <h2>Quét mã QR để thanh toán</h2>
-  <!-- referrerpolicy="origin": chỉ cho dịch vụ QR biết tên web, KHÔNG gửi đường dẫn có mã bí mật của đơn -->
-  <p><img src="{{ qr_url }}" alt="Mã QR thanh toán" width="300" referrerpolicy="origin"></p>
-  <p><a href="{{ qr_url }}" target="_blank" rel="noopener noreferrer">Không thấy mã QR? Bấm vào đây để mở ảnh QR</a></p>
-  <table border="1" cellpadding="6">
-    <tr><td>Ngân hàng</td><td>{{ bank_code }}</td></tr>
-    <tr><td>Số tài khoản</td><td>{{ bank_account }}</td></tr>
-    {% if bank_name %}<tr><td>Chủ tài khoản</td><td>{{ bank_name }}</td></tr>{% endif %}
-    <tr><td>Số tiền</td><td><b>{{ order.amount|vnd }}</b></td></tr>
-    <tr><td>Nội dung chuyển khoản</td><td><b>{{ order.payment_code }}</b></td></tr>
-  </table>
-  <p>Chuyển <b>đúng {{ order.amount|vnd }}</b> và giữ nguyên <b>nội dung {{ order.payment_code }}</b>.
-     Chuyển thiếu hoặc dư sẽ <b>không</b> được mở khóa tự động.</p>
-  <p id="status-line">Đang chờ thanh toán... (đơn hết hạn lúc {{ order.expires_at|vntime }})</p>
+  <h1>Thanh toán đơn hàng</h1>
+  <p class="loi-dan">Video: <b>{{ order.video_title }}</b></p>
+
+  <div class="khung-qr">
+    <!-- referrerpolicy="origin": chỉ cho dịch vụ QR biết tên web, KHÔNG gửi đường dẫn có mã bí mật của đơn -->
+    <img src="{{ qr_url }}" alt="Mã QR chuyển khoản {{ order.amount|vnd }}" width="300" referrerpolicy="origin">
+    <p class="cach-quet">Mở ứng dụng ngân hàng, chọn <b>Quét mã QR</b> rồi đưa camera vào mã này.</p>
+    <p><a href="{{ qr_url }}" target="_blank" rel="noopener noreferrer">Không thấy mã QR? Mở ảnh mã QR</a></p>
+  </div>
+
+  <div class="trang-thai-cho" id="status-line" role="status">
+    <span class="cham-nhap-nhay" aria-hidden="true"></span>
+    Đang chờ tiền về. Trang sẽ tự cập nhật, bạn không cần bấm gì.
+  </div>
+
+  <h2>Hoặc chuyển khoản bằng tay</h2>
+  <dl class="thong-tin-ck">
+    <div><dt>Ngân hàng</dt><dd>{{ bank_code }}</dd></div>
+    <div><dt>Số tài khoản</dt><dd><span>{{ bank_account }}</span>
+      <button type="button" class="nut-phu nut-nho" data-sao-chep="{{ bank_account }}">Sao chép</button></dd></div>
+    {% if bank_name %}<div><dt>Chủ tài khoản</dt><dd>{{ bank_name }}</dd></div>{% endif %}
+    <div><dt>Số tiền</dt><dd><span class="gia">{{ order.amount|vnd }}</span>
+      <button type="button" class="nut-phu nut-nho" data-sao-chep="{{ order.amount }}">Sao chép</button></dd></div>
+    <div><dt>Nội dung</dt><dd><b class="ma-don">{{ order.payment_code }}</b>
+      <button type="button" class="nut-phu nut-nho" data-sao-chep="{{ order.payment_code }}">Sao chép</button></dd></div>
+  </dl>
+
+  <div class="thong-bao nhac">
+    <p>Chuyển <b>đúng {{ order.amount|vnd }}</b> và giữ nguyên nội dung <b>{{ order.payment_code }}</b>.
+       Chuyển thiếu hoặc dư thì video sẽ không tự mở.</p>
+    <p>Hãy lưu lại địa chỉ trang này để tải video sau khi thanh toán.</p>
+  </div>
+
 {% elif status == 'paid' %}
-  <h2>✅ Thanh toán thành công!</h2>
-  <p>Cảm ơn bạn đã mua <b>{{ order.video_title }}</b>. Shop đã nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
+  <div class="thanh-cong">
+    <svg class="dau-tich" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="44"/><path d="M28 50 l13 13 l27 -29"/></svg>
+    <h1>Thanh toán thành công!</h1>
+    <p>Cảm ơn bạn đã mua <b>{{ order.video_title }}</b>.<br>
+       Shop đã nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
+  </div>
   {% if downloads_left > 0 %}
-    <p><a href="{{ url_for('store.start_download', token=order.access_token) }}">Tải video chất lượng cao</a>
-       (còn {{ downloads_left }} lượt tải)</p>
+    <a class="nut-chinh nut-xanh nut-rong nut-tai" href="{{ url_for('store.start_download', token=order.access_token) }}">Tải video về máy</a>
+    <p class="chu-thich">Bạn còn {{ downloads_left }} lượt tải. Nên lưu lại địa chỉ trang này.</p>
   {% else %}
-    <p>Đơn hàng đã hết lượt tải. Vui lòng liên hệ shop.</p>
+    <div class="thong-bao loi"><p>Đơn hàng đã hết lượt tải. Vui lòng liên hệ shop để được hỗ trợ.</p></div>
   {% endif %}
+
 {% elif status == 'expired' %}
-  <h2>Đơn hàng đã hết hạn</h2>
-  <p>Nếu bạn ĐÃ chuyển khoản, đừng lo: hệ thống vẫn ghi nhận khi tiền về, hãy tải lại trang sau ít phút.</p>
-  <p>Nếu chưa chuyển, hãy quay lại trang video và bấm Mua để tạo đơn mới.</p>
+  <h1>Mã QR đã hết hạn</h1>
+  <div class="thong-bao nhac">
+    <p>Nếu bạn <b>đã chuyển khoản</b>, đừng lo: tiền về là video tự mở. Hãy tải lại trang này sau vài phút.</p>
+    <p>Nếu bạn <b>chưa chuyển khoản</b>, hãy quay lại trang video và bấm <b>Mua video này</b> để lấy mã mới.</p>
+  </div>
+  <a class="nut-phu" href="{{ url_for('store.index') }}">Về danh sách video</a>
 {% else %}
-  <h2>Đơn hàng đã hủy</h2>
+  <h1>Đơn hàng đã hủy</h1>
+  <a class="nut-phu" href="{{ url_for('store.index') }}">Về danh sách video</a>
 {% endif %}
 </div>
 <script src="{{ url_for('static', filename='order.js') }}"></script>

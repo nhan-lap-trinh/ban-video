@@ -142,7 +142,15 @@ def create_app(test_config=None):
 
     @app.errorhandler(HTTPException)
     def _http_error(exc):
-        return render_template("error.html", code=exc.code, message=exc.description), exc.code
+        message = exc.description
+        if message == type(exc).description:  # thông báo mặc định tiếng Anh -> đổi sang tiếng Việt
+            message = {
+                404: "Trang bạn tìm không có hoặc đã bị gỡ.",
+                403: "Bạn không có quyền xem trang này.",
+                400: "Yêu cầu không hợp lệ. Hãy tải lại trang rồi thử lại.",
+                405: "Không thể mở trang này theo cách đó.",
+            }.get(exc.code, "Đã có lỗi. Hãy thử lại sau ít phút.")
+        return render_template("error.html", code=exc.code, message=message), exc.code
 
     # Mọi request POST phải có CSRF token, trừ webhook (SePay không có token,
     # webhook được bảo vệ bằng API Key / HMAC thay thế).
@@ -164,8 +172,10 @@ def create_app(test_config=None):
             # img-src cho phép mọi ảnh https: dịch vụ QR có thể chuyển tiếp sang máy chủ ảnh khác.
             # Ảnh không chạy được mã nên mở rộng chỗ này không ảnh hưởng an toàn.
             "default-src 'self'; img-src 'self' https: data:; "
+            "font-src 'self' https://fonts.gstatic.com; "
             "media-src 'self' blob:; "
-            "script-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; "
+            "script-src 'self'; style-src 'self' https://fonts.googleapis.com; form-action 'self'; "
+            "frame-ancestors 'none'; "
             "base-uri 'none'"
         )
         if config["PRODUCTION"]:

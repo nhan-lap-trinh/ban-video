@@ -1,32 +1,39 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Giao dịch ngân hàng{% endblock %}
+{% block title %}Tiền vào{% endblock %}
 {% block content %}
-<h1>Giao dịch tiền vào (từ webhook SePay)</h1>
-<p>
-  {% if only_review %}Đang xem: <b>chỉ giao dịch cần xem lại</b> | <a href="{{ url_for('admin.transactions') }}">xem tất cả</a>
-  {% else %}Đang xem: <b>tất cả</b> | <a href="{{ url_for('admin.transactions') }}?can-xem=1">chỉ giao dịch cần xem lại</a>{% endif %}
+<h1>Tiền vào tài khoản</h1>
+<p class="chu-thich">Mọi khoản tiền ngân hàng báo về, kể cả khoản không khớp đơn nào.</p>
+<p class="loc">
+  {% if only_review %}
+    <a class="nut-phu nut-nho" href="{{ url_for('admin.transactions') }}">Xem tất cả</a>
+    <span class="nut-chinh nut-nho" aria-current="true">Chỉ khoản cần xem lại</span>
+  {% else %}
+    <span class="nut-chinh nut-nho" aria-current="true">Tất cả</span>
+    <a class="nut-phu nut-nho" href="{{ url_for('admin.transactions') }}?can-xem=1">Chỉ khoản cần xem lại</a>
+  {% endif %}
 </p>
 {% set labels = {
-  'paid': 'Đúng tiền - đã mở khóa',
-  'overpaid': 'Dư tiền - đã mở khóa',
-  'underpaid': 'THIẾU TIỀN - chưa mở khóa',
+  'paid': 'Đúng tiền, đã mở video',
+  'overpaid': 'Chuyển dư',
+  'underpaid': 'Chuyển thiếu, chưa mở video',
   'duplicate_payment': 'Đơn đã trả, khách chuyển thêm',
   'unmatched': 'Không khớp đơn nào',
   'wrong_account': 'Sai tài khoản nhận'} %}
-<table border="1" cellpadding="6">
-  <tr><th>Nhận lúc</th><th>Số tiền</th><th>Nội dung</th><th>Mã đơn</th><th>Kết quả</th><th>Ghi chú</th><th>Mã tham chiếu NH</th></tr>
+<div class="bang-cuon">
+<table>
+  <tr><th>Lúc</th><th class="so">Số tiền</th><th>Kết quả</th><th>Nội dung khách ghi</th><th>Mã đơn</th><th>Ghi chú</th></tr>
   {% for t in rows %}
   <tr>
     <td>{{ t.received_at|vntime }}</td>
-    <td>{{ t.amount|vnd }}</td>
+    <td class="so"><b>{{ t.amount|vnd }}</b></td>
+    <td><span class="nhan {{ 'nhan-can-xem' if t.result in needs_review else 'nhan-paid' }}">{{ labels.get(t.result, t.result) }}</span></td>
     <td>{{ t.content }}</td>
     <td>{{ t.payment_code or '' }}</td>
-    <td>{% if t.result in needs_review %}<b>{{ labels.get(t.result, t.result) }}</b>{% else %}{{ labels.get(t.result, t.result) }}{% endif %}</td>
     <td>{{ t.note or '' }}</td>
-    <td>{{ t.reference_code or '' }}</td>
   </tr>
   {% else %}
-  <tr><td colspan="7">Chưa có giao dịch.</td></tr>
+  <tr><td colspan="6">Chưa có khoản tiền nào.</td></tr>
   {% endfor %}
 </table>
+</div>
 {% endblock %}
