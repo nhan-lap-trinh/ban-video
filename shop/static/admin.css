@@ -1,0 +1,12 @@
+/* Chỉ dùng cho trang quản lý. Giữ nền trắng chữ đen. */
+.dropzone {
+  border: 2px dashed #000;
+  padding: 16px;
+  margin: 6px 0 14px;
+  max-width: 560px;
+  cursor: pointer;
+}
+.dropzone.dang-keo { border-style: solid; background: #eee; }
+.dropzone input[type="file"] { display: block; margin-top: 8px; }
+.dropzone .ten-file { margin-top: 8px; font-weight: bold; }
+.gia-xem-truoc { margin-left: 8px; }

@@ -1,0 +1,95 @@
+// Tiện ích cho trang quản lý:
+//  1. Ô giá tiền tự thêm dấu chấm phân cách hàng nghìn khi gõ (5000 -> 5.000).
+//  2. Ô chọn file nhận cả kéo-thả.
+// Đây chỉ là tiện ích hiển thị. Máy chủ vẫn tự bỏ dấu chấm và kiểm tra lại giá,
+// nên dù JavaScript có bị tắt hay bị sửa thì dữ liệu lưu vào vẫn đúng.
+
+// "50000" -> "50.000". Chỉ giữ chữ số, bỏ số 0 vô nghĩa ở đầu.
+function dinhDangNghin(chuoi) {
+  var so = String(chuoi).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return so.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Đếm số chữ số nằm bên trái vị trí con trỏ.
+function demChuSo(chuoi, viTri) {
+  return String(chuoi).slice(0, viTri).replace(/\D/g, "").length;
+}
+
+// Tìm vị trí trong chuỗi mới sao cho bên trái có đúng `n` chữ số.
+function viTriSauNChuSo(chuoi, n) {
+  if (n === 0) return 0;
+  var dem = 0;
+  for (var i = 0; i < chuoi.length; i++) {
+    if (/\d/.test(chuoi[i]) && ++dem === n) return i + 1;
+  }
+  return chuoi.length;
+}
+
+function ganOGia(o) {
+  function capNhat() {
+    var cu = o.value;
+    var soChuSoTruocConTro = demChuSo(cu, o.selectionStart == null ? cu.length : o.selectionStart);
+    var moi = dinhDangNghin(cu);
+    if (moi !== cu) {
+      o.value = moi;
+      // Giữ con trỏ đúng chỗ, để gõ/xóa ở giữa không bị nhảy về cuối
+      var p = viTriSauNChuSo(moi, soChuSoTruocConTro);
+      try { o.setSelectionRange(p, p); } catch (e) {}
+    }
+  }
+  o.addEventListener("input", capNhat);
+  capNhat(); // định dạng sẵn giá trị cũ (khi form bị trả về vì lỗi)
+}
+
+function kichThuocDep(byte) {
+  if (byte >= 1073741824) return (byte / 1073741824).toFixed(2) + " GB";
+  if (byte >= 1048576) return (byte / 1048576).toFixed(1) + " MB";
+  if (byte >= 1024) return Math.round(byte / 1024) + " KB";
+  return byte + " byte";
+}
+
+function ganVungKeoTha(vung) {
+  var input = vung.querySelector('input[type="file"]');
+  var nhan = vung.querySelector(".ten-file");
+  if (!input) return;
+
+  function hienTen() {
+    if (!nhan) return;
+    var f = input.files && input.files[0];
+    nhan.textContent = f ? "Đã chọn: " + f.name + " (" + kichThuocDep(f.size) + ")" : "";
+  }
+
+  vung.addEventListener("dragover", function (e) {
+    e.preventDefault();               // bắt buộc, nếu không trình duyệt sẽ không cho thả
+    vung.classList.add("dang-keo");
+  });
+  vung.addEventListener("dragleave", function () { vung.classList.remove("dang-keo"); });
+  vung.addEventListener("drop", function (e) {
+    e.preventDefault();               // chặn trình duyệt tự mở file
+    vung.classList.remove("dang-keo");
+    var files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    // Chỉ lấy file đầu tiên (mỗi ô chỉ nhận 1 file)
+    var dt = new DataTransfer();
+    dt.items.add(files[0]);
+    input.files = dt.files;
+    hienTen();
+  });
+  // Bấm vào vùng (ngoài nút) cũng mở hộp chọn file
+  vung.addEventListener("click", function (e) {
+    if (e.target !== input) input.click();
+  });
+  input.addEventListener("change", hienTen);
+}
+
+if (typeof document !== "undefined") {
+  document.querySelectorAll("input[data-gia]").forEach(ganOGia);
+  document.querySelectorAll(".dropzone").forEach(ganVungKeoTha);
+  // Lỡ thả file ra ngoài vùng: không để trình duyệt mở file đó và rời khỏi trang
+  window.addEventListener("dragover", function (e) { e.preventDefault(); });
+  window.addEventListener("drop", function (e) { e.preventDefault(); });
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { dinhDangNghin: dinhDangNghin, demChuSo: demChuSo, viTriSauNChuSo: viTriSauNChuSo };
+}

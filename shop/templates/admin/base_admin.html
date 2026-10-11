@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Quản lý{% endblock %} - Quản lý shop</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+  <p><b>TRANG QUẢN LÝ</b>
+  {% if session.get('is_admin') %}
+    | <a href="{{ url_for('admin.dashboard') }}">Doanh thu</a>
+    | <a href="{{ url_for('admin.videos') }}">Video</a>
+    | <a href="{{ url_for('admin.orders') }}">Đơn hàng</a>
+    | <a href="{{ url_for('admin.transactions') }}">Giao dịch</a>
+    | <a href="{{ url_for('store.index') }}" target="_blank" rel="noopener">Xem cửa hàng ↗</a>
+  </p>
+  <form method="post" action="{{ url_for('admin.logout') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button type="submit">Đăng xuất</button>
+  </form>
+  {% else %}
+  </p>
+  {% endif %}
+  <hr>
+  {% for message in get_flashed_messages() %}
+    <p><b>{{ message }}</b></p>
+  {% endfor %}
+  {% block content %}{% endblock %}
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

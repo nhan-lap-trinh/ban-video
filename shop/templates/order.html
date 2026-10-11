@@ -11,7 +11,9 @@
 
 {% if status == 'pending' %}
   <h2>Quét mã QR để thanh toán</h2>
-  <img src="{{ qr_url }}" alt="Mã QR thanh toán" width="280" height="280">
+  <!-- referrerpolicy="origin": chỉ cho dịch vụ QR biết tên web, KHÔNG gửi đường dẫn có mã bí mật của đơn -->
+  <p><img src="{{ qr_url }}" alt="Mã QR thanh toán" width="300" referrerpolicy="origin"></p>
+  <p><a href="{{ qr_url }}" target="_blank" rel="noopener noreferrer">Không thấy mã QR? Bấm vào đây để mở ảnh QR</a></p>
   <table border="1" cellpadding="6">
     <tr><td>Ngân hàng</td><td>{{ bank_code }}</td></tr>
     <tr><td>Số tài khoản</td><td>{{ bank_account }}</td></tr>
@@ -23,8 +25,8 @@
      Chuyển thiếu hoặc dư sẽ <b>không</b> được mở khóa tự động.</p>
   <p id="status-line">Đang chờ thanh toán... (đơn hết hạn lúc {{ order.expires_at|vntime }})</p>
 {% elif status == 'paid' %}
-  <h2>Đã thanh toán thành công</h2>
-  <p>Nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
+  <h2>✅ Thanh toán thành công!</h2>
+  <p>Cảm ơn bạn đã mua <b>{{ order.video_title }}</b>. Shop đã nhận {{ order.paid_amount|vnd }} lúc {{ order.paid_at|vntime }}.</p>
   {% if downloads_left > 0 %}
     <p><a href="{{ url_for('store.start_download', token=order.access_token) }}">Tải video chất lượng cao</a>
        (còn {{ downloads_left }} lượt tải)</p>

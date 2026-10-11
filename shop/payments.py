@@ -16,7 +16,7 @@ import secrets
 import sqlite3
 import time
 from datetime import timedelta
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
@@ -82,13 +82,20 @@ def order_display_status(order):
 def qr_image_url(config, amount, content):
     """Ảnh QR theo chuẩn VietQR (dịch vụ của SePay). App ngân hàng quét sẽ
     điền sẵn số tài khoản, số tiền và nội dung chuyển khoản."""
-    query = urlencode({
-        "acc": config["BANK_ACCOUNT_NUMBER"],
+    # Cùng định dạng với mã nhúng trên trang "Tạo QR" của SePay (my.sepay.vn/createqr),
+    # chỉ thêm 2 tham số thay đổi theo từng đơn: amount (số tiền) và des (mã đơn).
+    params = {
         "bank": config["BANK_CODE"],
+        "acc": config["BANK_ACCOUNT_NUMBER"],
+        "template": "compact",
         "amount": amount,
         "des": content,
-    })
-    return f"https://vietqr.app/img?{query}"
+    }
+    if config["BANK_ACCOUNT_NAME"]:
+        params["showinfo"] = "true"
+        params["holder"] = config["BANK_ACCOUNT_NAME"]
+    query = urlencode(params, quote_via=quote)  # quote: dấu cách thành %20 giống link của SePay
+    return f"{config['QR_IMAGE_BASE']}?{query}"
 
 
 # ---------------------------------------------------------------------------

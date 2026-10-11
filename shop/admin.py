@@ -20,7 +20,7 @@ from . import payments
 from .db import VN_TZ, get_db, transaction, utc_now
 from .security import admin_required, check_admin_credentials
 
-bp = Blueprint("admin", __name__, url_prefix="/quan-ly")
+bp = Blueprint("admin", __name__)  # đường dẫn gốc lấy từ ADMIN_PATH khi đăng ký
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".webm", ".m4v", ".mkv"}
 TEST_EXTENSIONS = {".txt"}  # chỉ cho phép khi ALLOW_TEST_FILES bật
@@ -47,7 +47,9 @@ def login():
             session["is_admin"] = True
             next_url = request.args.get("next", "")
             # chỉ cho chuyển hướng trong trang quản lý, chặn chuyển sang web lạ
-            if not next_url.startswith("/quan-ly"):
+            admin_root = current_app.config["ADMIN_PATH"] + "/"
+            if not (next_url == current_app.config["ADMIN_PATH"] or next_url.startswith(admin_root)) \
+                    or next_url.startswith("//"):
                 next_url = url_for("admin.dashboard")
             return redirect(next_url)
         else:

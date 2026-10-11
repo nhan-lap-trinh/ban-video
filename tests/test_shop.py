@@ -123,7 +123,9 @@ class TestCreateOrder(ShopTestCase):
     def test_order_page_shows_qr_and_hides_download(self):
         o = self.buy()
         html = self.client.get(f"/don-hang/{o['access_token']}").get_data(as_text=True)
-        self.assertIn("vietqr.app/img", html)
+        self.assertIn("https://vietqr.app/img?", html)
+        self.assertIn("template=compact", html)
+        self.assertIn("bank=MBBank", html)
         self.assertIn(o["payment_code"], html)
         self.assertIn("amount=50000", html)
         self.assertNotIn("Tải video chất lượng cao", html)
@@ -494,6 +496,74 @@ class TestConfigValidation(unittest.TestCase):
     def test_short_secret_key_refused(self):
         with self.assertRaises(RuntimeError):
             create_app({"SECRET_KEY": "ngan", "DATABASE": ":memory:"})
+
+
+class TestAdminSeparation(ShopTestCase):
+    def login(self):
+        return self.client.post("/quan-ly/dang-nhap", data={
+            "_csrf": self.csrf(), "username": "admin", "password": "mat-khau-rat-manh"})
+
+    def test_store_pages_never_link_to_admin_even_when_logged_in(self):
+        self.login()
+        o = self.buy()
+        self.send(self.payload(o["payment_code"], 50000))  # đơn đã thanh toán
+        for path in ("/", f"/video/{self.video_id}", f"/don-hang/{o['access_token']}", "/khong-co"):
+            html = self.client.get(path).get_data(as_text=True)
+            self.assertNotIn("/quan-ly", html, path)
+            self.assertNotIn("Doanh thu", html, path)
+            self.assertNotIn("Đăng xuất", html, path)
+
+    def test_admin_pages_have_admin_nav(self):
+        self.login()
+        html = self.client.get("/quan-ly/").get_data(as_text=True)
+        self.assertIn("TRANG QUẢN LÝ", html)
+        self.assertIn("Đăng xuất", html)
+        self.assertIn("admin.js", html)
+        self.assertIn("noindex", html)
+
+    def test_customer_cannot_open_admin(self):
+        for path in ("/quan-ly/", "/quan-ly/video", "/quan-ly/don-hang", "/quan-ly/giao-dich"):
+            resp = self.client.get(path)
+            self.assertEqual(resp.status_code, 302)
+            self.assertIn("dang-nhap", resp.headers["Location"])
+
+    def test_price_with_dots_saved_as_integer(self):
+        self.login()
+        resp = self.client.post("/quan-ly/video", data={
+            "_csrf": self.csrf(), "title": "Gia co cham", "price": "1.250.000",
+            "original_file": (io.BytesIO(b"x"), "a.txt"),
+        }, content_type="multipart/form-data")
+        self.assertEqual(resp.status_code, 302)
+        v = self.db.execute("SELECT price FROM videos WHERE title = 'Gia co cham'").fetchone()
+        self.assertEqual(v["price"], 1250000)
+
+    def test_upload_form_has_dropzones_and_price_hook(self):
+        self.login()
+        html = self.client.get("/quan-ly/video").get_data(as_text=True)
+        self.assertEqual(html.count('class="dropzone"'), 2)
+        self.assertIn("data-gia", html)
+
+
+class TestCustomAdminPath(ShopTestCase):
+    def setUp(self):
+        super().setUp()
+        cfg = dict(self.app.config)
+        cfg["ADMIN_PATH"] = "/bi-mat-123"
+        cfg["DATABASE"] = str(self.tmp / "shop2.db")
+        self.app2 = create_app({k: cfg[k] for k in (
+            "SECRET_KEY", "DATABASE", "PREVIEW_DIR", "ORIGINAL_DIR", "ADMIN_USERNAME",
+            "ADMIN_PASSWORD_HASH", "ADMIN_PATH", "BANK_ACCOUNT_NUMBER", "BANK_CODE")})
+        self.c2 = self.app2.test_client()
+
+    def test_old_path_gone_new_path_works(self):
+        self.assertEqual(self.c2.get("/quan-ly/").status_code, 404)
+        self.assertEqual(self.c2.get("/bi-mat-123/").status_code, 302)
+        self.assertEqual(self.c2.get("/bi-mat-123/dang-nhap").status_code, 200)
+
+    def test_bad_admin_path_refused(self):
+        with self.assertRaises(RuntimeError):
+            create_app({"SECRET_KEY": "s" * 48, "DATABASE": str(self.tmp / "x.db"),
+                        "ADMIN_PATH": "/a b"})
 
 
 class TestRenderSetup(unittest.TestCase):

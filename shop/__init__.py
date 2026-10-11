@@ -1,6 +1,7 @@
 """Khởi tạo ứng dụng Flask: đọc cấu hình, nối database, đăng ký các trang."""
 
 import os
+import re
 import secrets
 from pathlib import Path
 
@@ -50,6 +51,10 @@ def load_config():
         "BANK_ACCOUNT_NUMBER": os.environ.get("BANK_ACCOUNT_NUMBER", "").strip(),
         "BANK_CODE": os.environ.get("BANK_CODE", "").strip(),
         "BANK_ACCOUNT_NAME": os.environ.get("BANK_ACCOUNT_NAME", "").strip(),
+        # Dịch vụ vẽ ảnh QR của SePay. qr.sepay.vn và vietqr.app là của cùng SePay.
+        "QR_IMAGE_BASE": os.environ.get("QR_IMAGE_BASE", "https://vietqr.app/img").strip(),
+        # Đường dẫn trang quản lý. Đổi thành chuỗi khó đoán để người lạ không biết trang quản lý ở đâu.
+        "ADMIN_PATH": "/" + os.environ.get("ADMIN_PATH", "quan-ly").strip().strip("/"),
         "PAYMENT_PREFIX": os.environ.get("PAYMENT_PREFIX", "DH").strip().upper(),
         "ORDER_EXPIRE_MINUTES": _env_int("ORDER_EXPIRE_MINUTES", 15),
         "DOWNLOAD_LINK_SECONDS": _env_int("DOWNLOAD_LINK_SECONDS", 300),
@@ -69,6 +74,8 @@ def validate_config(config):
         problems.append("PAYMENT_PREFIX phải gồm 2-5 chữ cái (giống cấu hình trên SePay)")
     if config.get("ADMIN_PASSWORD") and len(config["ADMIN_PASSWORD"]) < 12:
         problems.append("ADMIN_PASSWORD phải có ít nhất 12 ký tự")
+    if not re.fullmatch(r"/[A-Za-z0-9_-]{3,64}", config.get("ADMIN_PATH", "/quan-ly")):
+        problems.append("ADMIN_PATH chỉ gồm chữ không dấu, số, '-' hoặc '_' (3-64 ký tự)")
     if config["SEPAY_AUTH_MODE"] not in ("apikey", "hmac"):
         problems.append("SEPAY_AUTH_MODE chỉ nhận 'apikey' hoặc 'hmac'")
     if problems:
@@ -125,7 +132,7 @@ def create_app(test_config=None):
     from .store import bp as store_bp
 
     app.register_blueprint(store_bp)
-    app.register_blueprint(admin_bp)
+    app.register_blueprint(admin_bp, url_prefix=app.config["ADMIN_PATH"])
 
     @app.errorhandler(HTTPException)
     def _http_error(exc):
@@ -145,10 +152,13 @@ def create_app(test_config=None):
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["X-Frame-Options"] = "DENY"
         # Không gửi địa chỉ trang (có chứa mã bí mật của đơn) sang web khác,
-        # ví dụ khi trình duyệt tải ảnh QR từ vietqr.app.
+        # ví dụ khi trình duyệt tải ảnh QR từ SePay.
         resp.headers["Referrer-Policy"] = "no-referrer"
         resp.headers["Content-Security-Policy"] = (
-            "default-src 'self'; img-src 'self' https://vietqr.app; media-src 'self'; "
+            # img-src cho phép mọi ảnh https: dịch vụ QR có thể chuyển tiếp sang máy chủ ảnh khác.
+            # Ảnh không chạy được mã nên mở rộng chỗ này không ảnh hưởng an toàn.
+            "default-src 'self'; img-src 'self' https: data:; "
+            "media-src 'self'; "
             "script-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; "
             "base-uri 'none'"
         )

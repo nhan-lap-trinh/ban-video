@@ -53,7 +53,7 @@ ban-video-ai/
 ├── scripts/
 │   ├── thiet_lap.py        ← tạo file .env lần đầu (khóa bí mật + tài khoản admin)
 │   └── gia_lap_webhook.py  ← giả lập SePay gửi webhook để test trên máy
-├── tests/test_shop.py      ← 53 bài test tự động cho các tình huống tiền
+├── tests/test_shop.py      ← 60 bài test tự động cho các tình huống tiền
 └── data/                   ← (tự tạo khi chạy) database + file video. KHÔNG đưa lên GitHub
 ```
 
@@ -144,7 +144,7 @@ Khi chạy thật, nên chuyển sang **HMAC-SHA256** (an toàn hơn): trên SeP
 python -m unittest discover -s tests -v
 ```
 
-53 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
+60 bài test kiểm tra: webhook giả mạo, chữ ký HMAC sai / bị sửa / quá cũ, chuyển đúng / thiếu / dư, webhook gửi trùng, khách chuyển 2 lần, sai tài khoản nhận, trả tiền sau khi đơn hết hạn, đổi giá khi đơn đang chờ, link tải giả / hết hạn / hết lượt, chặn lấy file gốc qua đường dẫn lạ, đăng nhập admin, chặn dò mật khẩu...
 
 **Mỗi lần sửa code liên quan đến tiền, chạy lại lệnh này. Tất cả phải OK.**
 
@@ -177,3 +177,9 @@ python -m unittest discover -s tests -v
 - Tự tạo bản xem thử có watermark, chất lượng thấp từ file gốc.
 - Đưa lên máy chủ thật + HTTPS + tên miền.
 - Trang trí giao diện.
+
+## Trang quản lý tách riêng
+
+- Trang khách hàng **không có bất kỳ đường dẫn nào** tới trang quản lý, kể cả khi trình duyệt đang đăng nhập admin.
+- Trang quản lý dùng giao diện riêng (`templates/admin/base_admin.html`), có chữ **TRANG QUẢN LÝ** ở đầu.
+- Muốn giấu địa chỉ trang quản lý: thêm biến môi trường `ADMIN_PATH` (ví dụ `ADMIN_PATH=nhan-admin-7k2p`), khi đó trang quản lý ở `/nhan-admin-7k2p` và `/quan-ly` trả về 404.
