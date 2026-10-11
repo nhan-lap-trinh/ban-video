@@ -7,13 +7,27 @@
 {% if preview_url %}
   <p>Xem thử:</p>
   <div class="khung-xem-thu" id="khung-xem-thu">
-    <video id="video-xem-thu" src="{{ preview_url }}" controls preload="metadata" playsinline
-           controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
+    <video id="video-xem-thu" src="{{ preview_url }}" preload="metadata" playsinline
            disablePictureInPicture disableRemotePlayback></video>
-    <div class="chu-chay" id="chu-chay" aria-hidden="true">XEM THỬ{% if config.SHOP_NAME %} • {{ config.SHOP_NAME }}{% endif %}</div>
+    <div class="hoa-van" aria-hidden="true"></div>
     <div class="man-che" id="man-che" hidden>Video tạm dừng. Bấm vào đây để xem tiếp.</div>
+    <div class="thanh-dieu-khien">
+      <button type="button" id="nut-phat" class="nut" aria-label="Phát">
+        <svg viewBox="0 0 24 24" class="icon-phat"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" class="icon-dung"><path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor"/></svg>
+      </button>
+      <input type="range" id="thanh-tua" min="0" max="1000" value="0" step="1" aria-label="Tua video">
+      <span id="thoi-gian" class="thoi-gian">0:00 / 0:00</span>
+      <button type="button" id="nut-am" class="nut" aria-label="Tắt/bật tiếng">
+        <svg viewBox="0 0 24 24" class="icon-co-tieng"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" class="icon-tat-tieng"><path d="M4 9v6h4l5 4V5L8 9H4zm15.6 3 2.2-2.2-1.4-1.4-2.2 2.2-2.2-2.2-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4z" fill="currentColor"/></svg>
+      </button>
+      <button type="button" id="nut-toan-man-hinh" class="nut" aria-label="Toàn màn hình / thoát toàn màn hình">
+        <svg viewBox="0 0 24 24" class="icon-mo-rong"><path d="M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" class="icon-thu-nho"><path d="M8 4h2v6H4V8h4zm6 0h2v4h4v2h-6zM4 14h6v6H8v-4H4zm10 0h6v2h-4v4h-2z" fill="currentColor"/></svg>
+      </button>
+    </div>
   </div>
-  <p><button type="button" id="nut-toan-man-hinh">Xem toàn màn hình</button></p>
   <script src="{{ url_for('static', filename='preview.js') }}"></script>
 {% endif %}
 {% if video.description %}<p>{{ video.description }}</p>{% endif %}

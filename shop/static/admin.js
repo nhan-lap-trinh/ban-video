@@ -82,7 +82,75 @@ function ganVungKeoTha(vung) {
   input.addEventListener("change", hienTen);
 }
 
+// Gửi form thêm video bằng JavaScript để theo dõi được % đã tải lên,
+// trong lúc đó hiện màn chờ có vòng xoay.
+function ganFormTaiLen(form) {
+  var lop = document.getElementById("lop-cho");
+  var phanTram = document.getElementById("phan-tram");
+  var thanh = document.getElementById("thanh-tien-trinh");
+  var hopLoi = document.getElementById("loi-tai-len");
+  var dangGui = false;
+
+  function hienLoi(danhSach) {
+    hopLoi.textContent = "";
+    danhSach.forEach(function (loi) {
+      var p = document.createElement("p");
+      p.textContent = loi;            // textContent: không bao giờ chèn HTML lạ vào trang
+      hopLoi.appendChild(p);
+    });
+    hopLoi.scrollIntoView({ block: "center" });
+  }
+
+  form.addEventListener("submit", function (e) {
+    if (typeof FormData === "undefined" || typeof XMLHttpRequest === "undefined") return; // trình duyệt quá cũ: gửi kiểu thường
+    e.preventDefault();
+    if (dangGui) return;               // chặn bấm 2 lần tạo 2 sản phẩm
+    dangGui = true;
+    hopLoi.textContent = "";
+    phanTram.textContent = "0%";
+    thanh.value = 0;
+    lop.hidden = false;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", form.getAttribute("action") || window.location.href);
+    xhr.setRequestHeader("X-Upload-Ajax", "1");
+    xhr.upload.addEventListener("progress", function (ev) {
+      if (!ev.lengthComputable) return;
+      var pt = Math.floor((ev.loaded / ev.total) * 100);
+      thanh.value = pt;
+      phanTram.textContent = pt < 100 ? pt + "%" : "100% - đang lưu, sắp xong...";
+    });
+    xhr.addEventListener("load", function () {
+      var data = null;
+      try { data = JSON.parse(xhr.responseText); } catch (err) {}
+      if (xhr.status === 200 && data && data.ok) {
+        dangGui = false;                        // xong rồi, không cần hỏi khi rời trang nữa
+        window.location.href = data.redirect;   // về lại trang danh sách, có thông báo "Đã thêm"
+        return;
+      }
+      dangGui = false;
+      lop.hidden = true;
+      if (data && data.errors) hienLoi(data.errors);
+      else if (xhr.status === 413) hienLoi(["File quá lớn, vượt giới hạn cho phép."]);
+      else hienLoi(["Tải lên thất bại (mã " + xhr.status + "). Hãy tải lại trang rồi thử lại."]);
+    });
+    xhr.addEventListener("error", function () {
+      dangGui = false;
+      lop.hidden = true;
+      hienLoi(["Mất kết nối khi đang tải lên. Kiểm tra mạng rồi thử lại."]);
+    });
+    xhr.send(new FormData(form));
+  });
+
+  // Đang tải dở mà lỡ bấm đóng tab: trình duyệt hỏi lại
+  window.addEventListener("beforeunload", function (e) {
+    if (dangGui && lop && !lop.hidden) { e.preventDefault(); e.returnValue = ""; }
+  });
+}
+
 if (typeof document !== "undefined") {
+  var formTai = document.getElementById("form-tai-video");
+  if (formTai) ganFormTaiLen(formTai);
   document.querySelectorAll("input[data-gia]").forEach(ganOGia);
   document.querySelectorAll(".dropzone").forEach(ganVungKeoTha);
   // Lỡ thả file ra ngoài vùng: không để trình duyệt mở file đó và rời khỏi trang

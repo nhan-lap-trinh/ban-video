@@ -63,6 +63,8 @@ def load_config():
         "PREVIEW_LINK_SECONDS": _env_int("PREVIEW_LINK_SECONDS", 1800),
         # Chữ chạy trên video xem thử
         "SHOP_NAME": os.environ.get("SHOP_NAME", "").strip(),
+        # Chữ trong hoa văn watermark phủ lên video xem thử (mặc định = SHOP_NAME)
+        "WATERMARK_TEXT": (os.environ.get("WATERMARK_TEXT") or os.environ.get("SHOP_NAME") or "").strip(),
         # 1 = chỉ mở khóa khi chuyển ĐÚNG số tiền (thiếu hay dư đều không mở khóa)
         "STRICT_AMOUNT": os.environ.get("STRICT_AMOUNT", "1") != "0",
         "MAX_CONTENT_LENGTH": _env_int("MAX_UPLOAD_MB", 2048) * 1024 * 1024,

@@ -42,3 +42,5 @@ services:
         sync: false
       - key: SHOP_NAME
         sync: false
+      - key: WATERMARK_TEXT
+        sync: false

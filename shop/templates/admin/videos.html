@@ -1,10 +1,20 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Quản lý video{% endblock %}
+{% block title %}Quản lý video<div class="lop-cho" id="lop-cho" hidden>
+  <div class="hop-cho">
+    <div class="vong-xoay" aria-hidden="true"></div>
+    <p><b>Đang tải video lên, vui lòng chờ...</b></p>
+    <p id="phan-tram">0%</p>
+    <progress id="thanh-tien-trinh" max="100" value="0"></progress>
+    <p>Đừng đóng hoặc tải lại trang trong lúc này.</p>
+  </div>
+</div>
+{% endblock %}
 {% block content %}
 <h1>Video</h1>
 <h2>Thêm video mới</h2>
 {% for e in errors %}<p><b>{{ e }}</b></p>{% endfor %}
-<form method="post" enctype="multipart/form-data">
+<div id="loi-tai-len"></div>
+<form method="post" enctype="multipart/form-data" id="form-tai-video">
   <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
   <p>Tên video: <input name="title" required maxlength="200" value="{{ request.form.get('title', '') }}"></p>
   <p>Giá (đồng): <input name="price" required inputmode="numeric" autocomplete="off" data-gia
@@ -47,4 +57,13 @@
   <tr><td colspan="6">Chưa có video.</td></tr>
   {% endfor %}
 </table>
+<div class="lop-cho" id="lop-cho" hidden>
+  <div class="hop-cho">
+    <div class="vong-xoay" aria-hidden="true"></div>
+    <p><b>Đang tải video lên, vui lòng chờ...</b></p>
+    <p id="phan-tram">0%</p>
+    <progress id="thanh-tien-trinh" max="100" value="0"></progress>
+    <p>Đừng đóng hoặc tải lại trang trong lúc này.</p>
+  </div>
+</div>
 {% endblock %}

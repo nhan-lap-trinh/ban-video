@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from markupsafe import escape
+
 from flask import (
     Blueprint,
     abort,
@@ -58,6 +60,32 @@ def video_detail(video_id):
         signed = _preview_serializer().dumps({"v": video["id"], "f": video["preview_file"]})
         preview_url = url_for("store.preview_file", signed=signed)
     return render_template("video.html", video=video, preview_url=preview_url)
+
+
+@bp.route("/hinh-mo.svg")
+def watermark_svg():
+    """Một ô hoa văn: lưới hình thoi + chữ thương hiệu. Trình duyệt lặp ô này
+    phủ kín video xem thử (giống mẫu watermark của shop)."""
+    text = current_app.config["WATERMARK_TEXT"] or "XEM THỬ"
+    w, h = 300, 210
+    # Chữ đặt ở tâm 4 hình thoi chạm cạnh ô; phần bị cắt ở mép ô sẽ được ô bên cạnh vẽ tiếp
+    centers = [(w / 2, 0), (w / 2, h), (0, h / 2), (w, h / 2)]
+    texts = "".join(
+        f'<text x="{x:g}" y="{y:g}">{escape(text)}</text>' for x, y in centers
+    )
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+        '<g stroke="rgba(185,185,185,0.7)" stroke-width="1.4">'
+        f'<line x1="0" y1="0" x2="{w}" y2="{h}"/><line x1="{w}" y1="0" x2="0" y2="{h}"/>'
+        "</g>"
+        '<g font-family="Segoe Script, Brush Script MT, Lucida Handwriting, cursive" font-style="italic"'
+        ' font-size="30" text-anchor="middle" dominant-baseline="middle"'
+        ' fill="rgba(190,190,190,0.6)" stroke="rgba(60,60,60,0.45)" stroke-width="0.7">'
+        f"{texts}</g></svg>"
+    )
+    resp = current_app.response_class(svg, mimetype="image/svg+xml")
+    resp.headers["Cache-Control"] = "public, max-age=3600"
+    return resp
 
 
 @bp.route("/xem-thu/<signed>")

@@ -10,3 +10,34 @@
 .dropzone input[type="file"] { display: block; margin-top: 8px; }
 .dropzone .ten-file { margin-top: 8px; font-weight: bold; }
 .gia-xem-truoc { margin-left: 8px; }
+
+/* Màn chờ khi đang tải video lên */
+.lop-cho {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.lop-cho[hidden] { display: none; }
+.hop-cho {
+  border: 2px solid #000;
+  background: #fff;
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 90vw;
+}
+.hop-cho progress { width: 260px; max-width: 100%; }
+.vong-xoay {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  border: 5px solid #ddd;
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: xoay 0.9s linear infinite;
+}
+@keyframes xoay { to { transform: rotate(360deg); } }
+#loi-tai-len p { font-weight: bold; }

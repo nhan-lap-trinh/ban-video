@@ -1,30 +1,72 @@
-// Các lớp "gây khó" cho video XEM THỬ. Lưu ý: KHÔNG lớp nào chặn được quay màn hình
-// một cách tuyệt đối. Mục tiêu là làm việc lấy video phiền hơn và bản quay được xấu hơn.
+// Trình phát video XEM THỬ với các lớp "gây khó".
+// Lưu ý: KHÔNG lớp nào chặn được quay màn hình tuyệt đối. Mục tiêu là làm việc lấy
+// video phiền hơn và bản quay được xấu hơn (hoa văn watermark phủ kín, luôn trôi).
 (function () {
   var khung = document.getElementById("khung-xem-thu");
   var video = document.getElementById("video-xem-thu");
-  var chu = document.getElementById("chu-chay");
   var manChe = document.getElementById("man-che");
-  var nutToanManHinh = document.getElementById("nut-toan-man-hinh");
+  var nutPhat = document.getElementById("nut-phat");
+  var nutAm = document.getElementById("nut-am");
+  var nutToan = document.getElementById("nut-toan-man-hinh");
+  var thanhTua = document.getElementById("thanh-tua");
+  var thoiGian = document.getElementById("thoi-gian");
   if (!khung || !video) return;
 
-  // 1. Chặn chuột phải (menu "Lưu video thành...") và kéo video ra ngoài
+  // ---- Chặn chuột phải và kéo video ra ngoài ----
   khung.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   khung.addEventListener("dragstart", function (e) { e.preventDefault(); });
 
-  // 2. Chữ "XEM THỬ" nhảy tới vị trí ngẫu nhiên mỗi 3 giây, để không thể
-  //    che hay cắt bỏ nó ở một chỗ cố định trong bản quay
-  function doiViTri() {
-    if (!chu) return;
-    var maxLeft = Math.max(0, khung.clientWidth - chu.offsetWidth - 8);
-    var maxTop = Math.max(0, khung.clientHeight - chu.offsetHeight - 8);
-    chu.style.left = Math.round(Math.random() * maxLeft) + "px";
-    chu.style.top = Math.round(Math.random() * maxTop) + "px";
-  }
-  doiViTri();
-  setInterval(doiViTri, 3000);
+  // ---- Phát / dừng ----
+  function batTatPhat() { if (video.paused) video.play(); else video.pause(); }
+  nutPhat.addEventListener("click", batTatPhat);
+  video.addEventListener("click", batTatPhat);
+  video.addEventListener("play", function () { khung.classList.add("dang-phat"); boChe(); });
+  video.addEventListener("pause", function () { khung.classList.remove("dang-phat"); });
 
-  // 3. Rời khỏi tab hoặc chuyển sang cửa sổ/ứng dụng khác -> dừng video và che lại
+  // ---- Âm thanh ----
+  nutAm.addEventListener("click", function () {
+    video.muted = !video.muted;
+    khung.classList.toggle("tat-tieng", video.muted);
+  });
+
+  // ---- Thanh tua + thời gian ----
+  function dinhDangGiay(t) {
+    if (!isFinite(t)) t = 0;
+    var p = Math.floor(t / 60), g = Math.floor(t % 60);
+    return p + ":" + (g < 10 ? "0" : "") + g;
+  }
+  var dangKeoTua = false;
+  function capNhatThoiGian() {
+    var d = video.duration || 0;
+    if (!dangKeoTua && d) thanhTua.value = Math.round((video.currentTime / d) * 1000);
+    thoiGian.textContent = dinhDangGiay(video.currentTime) + " / " + dinhDangGiay(d);
+  }
+  video.addEventListener("timeupdate", capNhatThoiGian);
+  video.addEventListener("loadedmetadata", capNhatThoiGian);
+  thanhTua.addEventListener("input", function () {
+    dangKeoTua = true;
+    if (video.duration) video.currentTime = (thanhTua.value / 1000) * video.duration;
+  });
+  thanhTua.addEventListener("change", function () { dangKeoTua = false; });
+
+  // ---- Toàn màn hình: CÙNG MỘT NÚT ở góc phải dưới để vào và để thoát ----
+  // Phóng to cả khung (video + hoa văn watermark), không phải riêng video.
+  function dangToanManHinh() {
+    return document.fullscreenElement === khung || document.webkitFullscreenElement === khung;
+  }
+  nutToan.addEventListener("click", function () {
+    if (dangToanManHinh()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      var vao = khung.requestFullscreen || khung.webkitRequestFullscreen;
+      if (vao) vao.call(khung);
+      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iPhone không hỗ trợ phóng to khung
+    }
+  });
+  // Bấm đúp vào video cũng vào/thoát toàn màn hình
+  video.addEventListener("dblclick", function () { nutToan.click(); });
+
+  // ---- Rời tab hoặc chuyển sang cửa sổ/ứng dụng khác: dừng và che lại ----
   function che() {
     if (!video.paused) video.pause();
     khung.classList.add("bi-che");
@@ -34,24 +76,7 @@
     khung.classList.remove("bi-che");
     if (manChe) manChe.hidden = true;
   }
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) che();
-  });
-  window.addEventListener("blur", function () {
-    // Chỉ che khi đang xem dở, để không làm phiền lúc mới vào trang
-    if (video.currentTime > 0) che();
-  });
+  document.addEventListener("visibilitychange", function () { if (document.hidden) che(); });
+  window.addEventListener("blur", function () { if (video.currentTime > 0) che(); });
   if (manChe) manChe.addEventListener("click", function () { boChe(); video.play(); });
-  video.addEventListener("play", boChe);
-
-  // 4. Toàn màn hình cho CẢ KHUNG (video + chữ chạy), thay vì nút toàn màn hình
-  //    mặc định của trình duyệt (chỉ phóng to video, làm mất chữ chạy)
-  if (nutToanManHinh) {
-    nutToanManHinh.addEventListener("click", function () {
-      var req = khung.requestFullscreen || khung.webkitRequestFullscreen;
-      if (req) req.call(khung);
-      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iPhone cũ
-    });
-  }
-  document.addEventListener("fullscreenchange", function () { setTimeout(doiViTri, 100); });
 })();

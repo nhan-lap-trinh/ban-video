@@ -421,8 +421,20 @@ class TestDownload(ShopTestCase):
 
     def test_video_page_player_protections(self):
         html = self.client.get(f"/video/{self.video_id}").get_data(as_text=True)
-        for needle in ("nodownload", "disablePictureInPicture", "preview.js", "chu-chay", "XEM THỬ"):
+        for needle in ("disablePictureInPicture", "preview.js", "hoa-van", "nut-toan-man-hinh"):
             self.assertIn(needle, html)
+        # Không dùng thanh điều khiển mặc định (có nút tải / toàn màn hình riêng video)
+        self.assertNotRegex(html, r"<video[^>]*\scontrols")
+
+    def test_watermark_svg_uses_text_and_escapes_it(self):
+        self.app.config["WATERMARK_TEXT"] = 'Thầy cô Ơi! <script>"'
+        resp = self.client.get("/hinh-mo.svg")
+        self.assertEqual(resp.mimetype, "image/svg+xml")
+        body = resp.get_data(as_text=True)
+        self.assertIn("Thầy cô Ơi!", body)
+        self.assertNotIn("<script>", body)
+        self.assertEqual(body.count("<text"), 4)
+        self.assertEqual(body.count("<line"), 2)
 
 
 class TestAdmin(ShopTestCase):
@@ -472,6 +484,22 @@ class TestAdmin(ShopTestCase):
         self.assertEqual(v["price"], 75000)
         self.assertTrue((self.tmp / "originals" / v["original_file"]).exists())
         self.assertRegex(v["original_file"], r"^[0-9a-f]{32}\.mp4$")
+
+    def test_ajax_upload_returns_json(self):
+        self.login()
+        ok = self.client.post("/quan-ly/video", headers={"X-Upload-Ajax": "1"}, data={
+            "_csrf": self.csrf(), "title": "Ajax", "price": "5.000",
+            "original_file": (io.BytesIO(b"x"), "a.mp4"),
+        }, content_type="multipart/form-data")
+        self.assertEqual(ok.status_code, 200)
+        self.assertEqual(ok.get_json(), {"ok": True, "redirect": "/quan-ly/video"})
+        self.assertIn("Đã thêm sản phẩm: Ajax", self.client.get("/quan-ly/video").get_data(as_text=True))
+        bad = self.client.post("/quan-ly/video", headers={"X-Upload-Ajax": "1"}, data={
+            "_csrf": self.csrf(), "title": "", "price": "abc",
+        }, content_type="multipart/form-data")
+        self.assertEqual(bad.status_code, 400)
+        self.assertFalse(bad.get_json()["ok"])
+        self.assertGreaterEqual(len(bad.get_json()["errors"]), 2)
 
     def test_upload_txt_without_preview_in_test_mode(self):
         self.login()

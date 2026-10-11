@@ -1,4 +1,4 @@
-/* Khung video xem thử. Giữ giao diện tối giản, nền trắng chữ đen cho phần còn lại. */
+/* Khung video xem thử. Phần còn lại của trang giữ nền trắng chữ đen. */
 .khung-xem-thu {
   position: relative;
   display: inline-block;
@@ -9,23 +9,58 @@
   user-select: none;
   -webkit-user-select: none;
 }
-.khung-xem-thu video { display: block; width: 360px; max-width: 100%; }
+.khung-xem-thu video { display: block; width: 360px; max-width: 100%; cursor: pointer; }
+.khung-xem-thu:fullscreen { width: 100vw; height: 100vh; }
 .khung-xem-thu:fullscreen video { width: 100%; height: 100%; object-fit: contain; }
 
-/* Chữ "XEM THỬ" chạy ngẫu nhiên, đè lên video, không chặn chuột bấm nút điều khiển */
-.chu-chay {
+/* Hoa văn watermark: lưới hình thoi + chữ, lặp kín khung, trôi chậm để không cắt bỏ được */
+.hoa-van {
   position: absolute;
-  top: 10%;
-  left: 10%;
+  inset: 0;
   pointer-events: none;
-  color: rgba(255, 255, 255, 0.55);
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
-  font: bold 18px sans-serif;
-  line-height: 1.2;
-  white-space: nowrap;
-  transition: top 2.5s linear, left 2.5s linear;
+  background-image: url("/hinh-mo.svg");
+  background-size: 50% auto;
+  background-repeat: repeat;
+  animation: troi 40s linear infinite;
 }
-.khung-xem-thu:fullscreen .chu-chay { font-size: 32px; }
+.khung-xem-thu:fullscreen .hoa-van { background-size: 25% auto; }
+@keyframes troi {
+  from { background-position: 0 0; }
+  to { background-position: 300px 210px; }
+}
+
+/* Thanh điều khiển riêng (thay cho thanh mặc định của trình duyệt) */
+.thanh-dieu-khien {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+  line-height: 1;
+}
+.thanh-dieu-khien input[type="range"] { flex: 1; min-width: 40px; margin: 0; }
+.thoi-gian { color: #fff; font: 12px sans-serif; white-space: nowrap; }
+.nut {
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: #fff;
+  cursor: pointer;
+  line-height: 0;
+}
+.nut svg { width: 24px; height: 24px; }
+.icon-dung, .icon-tat-tieng, .icon-thu-nho { display: none; }
+.khung-xem-thu.dang-phat .icon-phat { display: none; }
+.khung-xem-thu.dang-phat .icon-dung { display: inline; }
+.khung-xem-thu.tat-tieng .icon-co-tieng { display: none; }
+.khung-xem-thu.tat-tieng .icon-tat-tieng { display: inline; }
+.khung-xem-thu:fullscreen .icon-mo-rong { display: none; }
+.khung-xem-thu:fullscreen .icon-thu-nho { display: inline; }
+.khung-xem-thu:fullscreen .nut svg { width: 32px; height: 32px; }
 
 /* Màn che khi người xem rời khỏi tab / cửa sổ */
 .man-che {
@@ -41,6 +76,11 @@
   font: 16px sans-serif;
   line-height: 1.4;
   cursor: pointer;
+  z-index: 2;
 }
 .man-che[hidden] { display: none; }
 .khung-xem-thu.bi-che video { filter: blur(24px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hoa-van { animation: none; }
+}

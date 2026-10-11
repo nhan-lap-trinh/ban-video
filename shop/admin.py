@@ -8,6 +8,7 @@ from flask import (
     abort,
     current_app,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -127,6 +128,8 @@ def videos():
     original_exts = set(VIDEO_EXTENSIONS)
     if current_app.config["ALLOW_TEST_FILES"]:
         original_exts |= TEST_EXTENSIONS
+    # Form gửi bằng JavaScript (để hiện thanh tiến trình) thì trả về JSON thay vì trang HTML
+    is_ajax = request.headers.get("X-Upload-Ajax") == "1"
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -161,7 +164,11 @@ def videos():
                     (title, description, int(price_text), preview_name, original_name),
                 )
             flash(f"Đã thêm sản phẩm: {title}")
+            if is_ajax:
+                return jsonify({"ok": True, "redirect": url_for("admin.videos")})
             return redirect(url_for("admin.videos"))
+        if is_ajax:
+            return jsonify({"ok": False, "errors": errors}), 400
 
     rows = db.execute(
         "SELECT v.*, (SELECT COUNT(*) FROM orders o WHERE o.video_id = v.id AND o.status = 'paid')"
